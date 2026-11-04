@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
 <meta name="theme-color" content="#8ec9ee" />
-<title>Shiba Run — Japan Edition v1.2</title>
+<title>Shiba Run — Japan Edition v1.3 · Shiba Wardrobe</title>
 <style>
 :root{color-scheme:light;--ink:#493321;--cream:#fff8e9;--orange:#ec8d41}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:#f7d89f;font-family:ui-rounded,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;-webkit-user-select:none;user-select:none}
@@ -16,15 +16,37 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 #overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:22px;pointer-events:none}
 #panel{pointer-events:auto;max-width:390px;width:min(100%,390px);padding:24px 22px 21px;text-align:center;background:#fff9e9f2;border:3px solid #fff;border-radius:30px;box-shadow:0 14px 0 #bf803f40,0 22px 50px #68401b30;color:var(--ink)}
 #panel .eyebrow{font-size:12px;font-weight:900;letter-spacing:.2em;color:#c67c37;margin-bottom:8px}#panel h1{font-weight:1000;margin:0;font-size:clamp(38px,9vw,57px);line-height:.96;letter-spacing:-.065em;color:#d97b2b;text-shadow:2px 3px 0 #f5d6a7}#panel p{font-size:15px;line-height:1.45;margin:13px 0 19px;font-weight:600}#panel button{background:#e98938;color:white;border:0;border-bottom:5px solid #be601d;border-radius:17px;width:100%;padding:14px;font-size:19px;font-weight:950;cursor:pointer;touch-action:manipulation}#panel button:active{transform:translateY(3px);border-bottom-width:2px}
+#panel .shop-btn{margin-top:10px;background:#fff1d9;color:#86542d;border:2px solid #f5d0a3;border-bottom:4px solid #dbad7e;font-size:15px;padding:10px}
+#panel .shop-btn:active{border-bottom-width:2px}
+#panel.shop-panel{max-height:min(78dvh,670px);overflow-y:auto;padding:16px 15px;text-align:left}
+#panel.shop-panel h1{font-size:33px;text-align:center}
+.shop-balance{text-align:center;font-weight:900;margin:12px 0;color:#9b6631}
+.shop-row{display:flex;align-items:center;gap:9px;background:#fff;border:2px solid #f2dfc8;border-radius:16px;padding:7px;margin:7px 0}
+.shop-pic{flex:0 0 66px;width:66px;height:66px;background-repeat:no-repeat;background-size:400% 300%;background-position:left top;border-radius:10px}
+.shop-meta{min-width:0;flex:1;font-size:13px;font-weight:900}
+.shop-meta small{display:block;font-size:10px;color:#977558;margin-top:3px}
+#panel .shop-action{width:auto;font-size:12px;min-width:86px;padding:10px 7px;border-radius:11px;border-bottom-width:3px}
+#panel .shop-action:disabled{background:#d9cdbd;border-color:#c3b49f;color:#7a6e5d}
 #panel .hint{font-size:11px;color:#a47f58;font-weight:800;margin-top:13px}#panel .results{display:flex;justify-content:center;gap:34px;margin:14px 0 20px;font-size:25px;font-weight:950}#panel .results small{display:block;font-size:10px;letter-spacing:.13em;color:#a47f58}#overlay.hidden{display:none}
 #tip{position:fixed;bottom:max(20px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);padding:9px 15px;border-radius:50px;background:#fff9edbf;font-size:12px;font-weight:850;white-space:nowrap;color:#72502d;pointer-events:none;transition:opacity .25s}
-@media(max-height:520px){#panel{padding:15px 20px}#panel h1{font-size:37px}#panel p{margin:8px 0}#panel .hint{margin-top:7px}}
+@media(max-height:520px){#panel{padding:15px 20px}#panel h1{font-size:37px}#panel p{margin:8px 0}#panel .shop-btn{margin-top:10px;background:#fff1d9;color:#86542d;border:2px solid #f5d0a3;border-bottom:4px solid #dbad7e;font-size:15px;padding:10px}
+#panel .shop-btn:active{border-bottom-width:2px}
+#panel.shop-panel{max-height:min(78dvh,670px);overflow-y:auto;padding:16px 15px;text-align:left}
+#panel.shop-panel h1{font-size:33px;text-align:center}
+.shop-balance{text-align:center;font-weight:900;margin:12px 0;color:#9b6631}
+.shop-row{display:flex;align-items:center;gap:9px;background:#fff;border:2px solid #f2dfc8;border-radius:16px;padding:7px;margin:7px 0}
+.shop-pic{flex:0 0 66px;width:66px;height:66px;background-repeat:no-repeat;background-size:400% 300%;background-position:left top;border-radius:10px}
+.shop-meta{min-width:0;flex:1;font-size:13px;font-weight:900}
+.shop-meta small{display:block;font-size:10px;color:#977558;margin-top:3px}
+#panel .shop-action{width:auto;font-size:12px;min-width:86px;padding:10px 7px;border-radius:11px;border-bottom-width:3px}
+#panel .shop-action:disabled{background:#d9cdbd;border-color:#c3b49f;color:#7a6e5d}
+#panel .hint{margin-top:7px}}
 </style>
 </head>
 <body>
 <canvas id="game" aria-label="Shiba Run game"></canvas>
 <div id="hud"><div class="hud-box"><small>DISTANCE</small><span id="score">0000</span> m</div><div class="hud-right"><div class="hud-box"><small>BEST</small><span id="best">0000</span></div><div class="hud-box"><small>BONES</small><span class="bone">🦴 <span id="bones">0</span></span></div><button id="sound" aria-label="Toggle sound">🔊</button></div></div>
-<div id="overlay"><div id="panel"><div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div></div></div>
+<div id="overlay"><div id="panel"><div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div></div></div>
 <div id="tip">TAP TO JUMP · DOUBLE JUMP!</div>
 <script>
 (() => {
@@ -35,8 +57,48 @@ const scoreEl=$('score'),bestEl=$('best'),bonesEl=$('bones');
 let W=400,H=750,DPR=1,ground=580,scale=1,last=0,mode='ready',clock=0,meters=0,bones=0,best=0,muted=false,worldX=0,spawnTimer=0,objects=[],particles=[],shake=0;
 try{best=Number(localStorage.getItem('shiba-run-best')||0)}catch(e){}bestEl.textContent=String(best).padStart(4,'0');
 const dog={x:95,y:0,vy:0,jumps:0,rot:0,anim:'idle',animTime:0,actionTime:0,spinTime:0};
-const dogAtlas=new Image();let atlasReady=false;
-dogAtlas.onload=()=>{atlasReady=true};dogAtlas.onerror=()=>{atlasReady=false};dogAtlas.src='shiba-atlas.png';
+const skinCatalog=[
+  {id:'classic',name:'Classic Shiba',price:0,image:'shiba-atlas.png'},
+  {id:'ninja',name:'Ninja Shiba',price:25,image:'skins/ninja-atlas.png'},
+  {id:'samurai',name:'Samurai Shiba',price:50,image:'skins/samurai-atlas.png'},
+  {id:'hotdog',name:'Hot Dog Shiba',price:75,image:'skins/hotdog-atlas.png'}
+];
+const skinImages={};for(const skin of skinCatalog){const im=new Image();im.src=skin.image;skinImages[skin.id]=im;}
+let wallet=0,owned=['classic'],selectedSkin='classic';
+try{
+  wallet=Math.max(0,Number(localStorage.getItem('shiba-run-wallet')||0)||0);
+  const saved=JSON.parse(localStorage.getItem('shiba-run-owned')||'["classic"]');
+  if(Array.isArray(saved))owned=['classic',...saved.filter(v=>skinCatalog.some(s=>s.id===v))];
+  const sel=localStorage.getItem('shiba-run-skin');if(owned.includes(sel))selectedSkin=sel;
+}catch(e){}
+function saveWardrobe(){try{localStorage.setItem('shiba-run-wallet',String(wallet));localStorage.setItem('shiba-run-owned',JSON.stringify(owned));localStorage.setItem('shiba-run-skin',selectedSkin)}catch(e){}}
+function bindMenu(){
+  const open=$('openShop');if(open)open.addEventListener('click',e=>{e.stopPropagation();showShop()});
+  const start=$('start');if(start)start.addEventListener('click',e=>{e.stopPropagation();reset()});
+}
+function showHome(){
+ mode='ready';overlay.classList.remove('hidden');panel.classList.remove('shop-panel');
+ panel.innerHTML=`<div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div>`;
+ bindMenu();
+}
+function showShop(){
+ mode='shop';overlay.classList.remove('hidden');panel.classList.add('shop-panel');
+ const rows=skinCatalog.map(s=>{
+  const got=owned.includes(s.id),on=selectedSkin===s.id;
+  const disabled=on||(!got&&wallet<s.price);
+  const txt=on?'EQUIPPED':got?'EQUIP':`🦴 ${s.price}`;
+  return `<div class="shop-row"><div class="shop-pic" style="background-image:url('${s.image}')"></div><div class="shop-meta">${s.name}<small>${on?'Currently wearing':got?'Unlocked':s.price+' bones'}</small></div><button class="shop-action" data-skin="${s.id}" ${disabled?'disabled':''}>${txt}</button></div>`;
+ }).join('');
+ panel.innerHTML=`<div class="eyebrow" style="text-align:center">COSTUME SHOP</div><h1>SHIBA WARDROBE</h1><div class="shop-balance">🦴 YOUR BONES: ${wallet}</div>${rows}<button class="shop-btn" id="backHome">← BACK TO GAME</button><div class="hint" style="text-align:center">Costumes are cosmetic · Saved on this device</div>`;
+ $('backHome').addEventListener('click',e=>{e.stopPropagation();showHome()});
+ panel.querySelectorAll('[data-skin]').forEach(btn=>btn.addEventListener('click',e=>{
+   e.stopPropagation();const id=btn.dataset.skin,s=skinCatalog.find(x=>x.id===id);
+   if(!s)return;
+   if(!owned.includes(id)){if(wallet<s.price)return;wallet-=s.price;owned.push(id);beep(860,.13,'triangle',.10)}
+   selectedSkin=id;saveWardrobe();showShop();
+ }));
+}
+bindMenu();
 const spriteFrames={idle:0,run_1:1,run_2:2,run_3:3,run_4:4,jump_launch:5,jump_air:6,double_jump:7,landing:8,hurt:9,collect:10,game_over:11};
 // Mobile-friendly background layers; preload both themes so day/night transitions never stall.
 const cityImages={};
@@ -87,10 +149,10 @@ $('sound').onclick=e=>{e.stopPropagation();muted=!muted;$('sound').textContent=m
 function reset(){mode='playing';clock=0;meters=0;bones=0;worldX=0;spawnTimer=1.1;objects=[];particles=[];shake=0;dog.y=ground-24*scale;dog.vy=0;dog.jumps=0;dog.rot=0;dog.anim='run_1';dog.animTime=0;dog.actionTime=0;dog.spinTime=0;gameOverDelay=0;scoreEl.textContent='0000';bonesEl.textContent='0';overlay.classList.add('hidden');tip.style.opacity='1'}
 function jump(){if(dog.jumps>=2)return;dog.vy=-(dog.jumps===0?595:525)*scale;dog.jumps++;dog.actionTime=0;dog.spinTime=0;anim(dog.jumps===1?'jump_launch':'double_jump');beep(dog.jumps===1?520:720,.11,'triangle',.065);for(let i=0;i<7;i++)particles.push({x:dog.x-20*scale,y:ground-6*scale,vx:rand(-70,30)*scale,vy:rand(-100,-10)*scale,life:.35,color:'#e7c38f',r:rand(2,5)*scale});}
 function action(e){if(e&&e.cancelable)e.preventDefault();if(mode==='playing')jump();else if(mode==='ready'||mode==='over')reset()}
-c.addEventListener('pointerdown',action);$('start').addEventListener('pointerdown',e=>e.stopPropagation());$('start').addEventListener('click',e=>{e.stopPropagation();reset()});document.addEventListener('keydown',e=>{if(['Space','ArrowUp','KeyW'].includes(e.code)){if(e.repeat)return;action(e)}});
+c.addEventListener('pointerdown',action);$('start').addEventListener('pointerdown',e=>e.stopPropagation());document.addEventListener('keydown',e=>{if(['Space','ArrowUp','KeyW'].includes(e.code)){if(e.repeat)return;action(e)}});
 function makeObstacle(){const size=rand(25,40)*scale;objects.push({type:pick(['cone','bush','cone','log']),x:W+60*scale,y:ground,w:size*(Math.random()>.7?1.3:1),h:size,hit:false});if(Math.random()<.7){const amount=Math.random()<.25?3:1;for(let i=0;i<amount;i++)objects.push({type:'bone',x:W+(amount===1?20:i*34)*scale+60*scale,y:ground-rand(87,140)*scale,w:20*scale,h:18*scale,hit:false})}}
 function puff(x,y,color,n=9){for(let i=0;i<n;i++)particles.push({x,y,vx:rand(-170,170)*scale,vy:rand(-240,-60)*scale,life:rand(.3,.65),color,r:rand(3,7)*scale})}
-function gameOver(){mode='over';gameOverDelay=.62;anim('hurt');shake=9;beep(170,.26,'sawtooth',.13);if(Math.floor(meters)>best){best=Math.floor(meters);try{localStorage.setItem('shiba-run-best',best)}catch(e){}}bestEl.textContent=String(best).padStart(4,'0');panel.innerHTML=`<div class="eyebrow">THE ADVENTURE ENDS</div><h1>OOPS! 🐕</h1><p>Our brave shiba has met an obstacle.</p><div class="results"><div><small>DISTANCE</small>${Math.floor(meters)} m</div><div><small>BONES</small>${bones} 🦴</div></div><button id="start">TRY AGAIN →</button><div class="hint">TAP TO TRY AGAIN</div>`;$('start').addEventListener('click',e=>{e.stopPropagation();reset()})}
+function gameOver(){mode='over';gameOverDelay=.62;anim('hurt');shake=9;beep(170,.26,'sawtooth',.13);if(Math.floor(meters)>best){best=Math.floor(meters);try{localStorage.setItem('shiba-run-best',best)}catch(e){}}bestEl.textContent=String(best).padStart(4,'0');panel.innerHTML=`<div class="eyebrow">THE ADVENTURE ENDS</div><h1>OOPS! 🐕</h1><p>Our brave shiba has met an obstacle.</p><div class="results"><div><small>DISTANCE</small>${Math.floor(meters)} m</div><div><small>BONES</small>${bones} 🦴</div></div><button id="start">TRY AGAIN →</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP TO TRY AGAIN</div>`;bindMenu()}
 function update(dt){clock+=dt;dog.animTime+=dt;dog.actionTime+=dt;shake=Math.max(0,shake-dt*15);
 if(mode!=='playing'){
 if(mode==='ready'){anim('idle');dog.y=ground-24*scale+Math.sin(clock*3)*2;}
@@ -101,7 +163,7 @@ const speed=(250+Math.min(220,meters*.20))*scale;worldX+=speed*dt;meters+=speed*
 if(dog.jumps===0){if(dog.anim==='landing'&&dog.actionTime<.14){}else if(dog.anim==='collect'&&dog.actionTime<.28){}else anim('run_1')}
 else if(dog.jumps===2){anim('double_jump');dog.spinTime+=dt}
 else if(dog.actionTime<.11)anim('jump_launch');else anim('jump_air');
- for(let i=objects.length-1;i>=0;i--){const o=objects[i];o.x-=speed*dt;if(o.x<-100){objects.splice(i,1);continue}if(o.hit)continue;const dx=Math.abs(o.x-dog.x),feet=dog.y+24*scale,bodyTop=dog.y-20*scale;if(o.type==='bone'){if(dx<27*scale&&Math.abs(dog.y-o.y)<34*scale){o.hit=true;if(dog.jumps===0){anim('collect');dog.actionTime=0}bones++;bonesEl.textContent=bones;beep(850,.12,'sine',.065);puff(o.x,o.y,'#ffca57',8);objects.splice(i,1)}}else{if(dx<((o.w*.47)+(13*scale))&&feet>ground-o.h+8*scale&&bodyTop<ground-5*scale){puff(dog.x+12*scale,dog.y,'#fff2d7',14);gameOver();break}}}
+ for(let i=objects.length-1;i>=0;i--){const o=objects[i];o.x-=speed*dt;if(o.x<-100){objects.splice(i,1);continue}if(o.hit)continue;const dx=Math.abs(o.x-dog.x),feet=dog.y+24*scale,bodyTop=dog.y-20*scale;if(o.type==='bone'){if(dx<27*scale&&Math.abs(dog.y-o.y)<34*scale){o.hit=true;if(dog.jumps===0){anim('collect');dog.actionTime=0}bones++;wallet++;saveWardrobe();bonesEl.textContent=bones;beep(850,.12,'sine',.065);puff(o.x,o.y,'#ffca57',8);objects.splice(i,1)}}else{if(dx<((o.w*.47)+(13*scale))&&feet>ground-o.h+8*scale&&bodyTop<ground-5*scale){puff(dog.x+12*scale,dog.y,'#fff2d7',14);gameOver();break}}}
  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=450*scale*dt;p.life-=dt;if(p.life<=0)particles.splice(i,1)} }
 function rounded(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
 function ellipse(x,y,rx,ry,color){ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill()}
@@ -205,7 +267,7 @@ ctx.strokeStyle='#643d31';ctx.lineWidth=1.7;ctx.beginPath();ctx.moveTo(44,-1);ct
 // bandana
 poly([[10,4],[20,7],[12,18]],'#e54d44');ctx.restore()}
 function drawDog(x,y,t){
-if(!atlasReady){shiba(x,y,t);return}
+const dogAtlas=skinImages[selectedSkin];if(!dogAtlas||!dogAtlas.complete||!dogAtlas.naturalWidth){shiba(x,y,t);return}
 let frame=dog.anim;
 if(frame==='run_1'){const idx=Math.floor(worldX/(33*scale))%4;frame=['run_1','run_2','run_3','run_4'][idx]}
 if(frame==='hurt'&&dog.animTime>.27)frame='game_over';
