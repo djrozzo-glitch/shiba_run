@@ -93,14 +93,23 @@ if(!atlasReady){shiba(x,y,t);return}
 let frame=dog.anim;
 if(frame==='run_1'){const idx=Math.floor(worldX/(33*scale))%4;frame=['run_1','run_2','run_3','run_4'][idx]}
 if(frame==='hurt'&&dog.animTime>.27)frame='game_over';
+// The double_jump artwork is already upside-down. Spin the upright airborne pose instead.
+if(dog.jumps===2)frame='jump_air';
 const index=spriteFrames[frame]??0,fw=320,fh=320;
 const sx=(index%4)*fw,sy=Math.floor(index/4)*fh;
 const size=137*scale;
 const py=y+24*scale-(258/320)*size;
-ctx.save();ctx.translate(x,py+(258/320)*size);
-if(dog.jumps===2){ctx.rotate(Math.min(1,dog.spinTime/.46)*Math.PI*2)}
-else ctx.rotate(dog.rot);
-ctx.drawImage(dogAtlas,sx,sy,fw,fh,-size/2,-(258/320)*size,size,size);
+ctx.save();
+if(dog.jumps===2){
+  // Rotate around the dog's body, and finish one complete somersault in flight.
+  ctx.translate(x,py+size*.49);
+  ctx.rotate(Math.min(1,dog.spinTime/.46)*Math.PI*2);
+  ctx.drawImage(dogAtlas,sx,sy,fw,fh,-size/2,-size*.49,size,size);
+}else{
+  ctx.translate(x,py+(258/320)*size);
+  ctx.rotate(dog.rot);
+  ctx.drawImage(dogAtlas,sx,sy,fw,fh,-size/2,-(258/320)*size,size,size);
+}
 ctx.restore();
 }
 function obstacle(o){const x=o.x,y=o.y,w=o.w,h=o.h;if(o.type==='cone'){poly([[x-w*.5,y],[x,y-h],[x+w*.5,y]],'#ed8251');poly([[x,y-h],[x+w*.5,y],[x+w*.17,y]],'#f5a26b');rounded(x-w*.6,y-8*scale,w*1.2,8*scale,3*scale,'#c8683a');rounded(x-w*.29,y-h*.42,w*.58,h*.13,2,'#fff7dc')}else if(o.type==='bush'){ellipse(x,y-h*.39,w*.59,h*.42,'#558e5f');ellipse(x-w*.24,y-h*.36,w*.43,h*.38,'#71a66b');ellipse(x+w*.23,y-h*.48,w*.41,h*.37,'#82b57a');ellipse(x,y-h*.64,w*.35,h*.33,'#7dae70')}else{rounded(x-w*.57,y-h*.46,w*1.13,h*.45,9*scale,'#956640');ellipse(x-w*.53,y-h*.23,h*.19,h*.225,'#bb8450');ellipse(x-w*.53,y-h*.23,h*.09,h*.1,'#78502d')}}
