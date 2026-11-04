@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
 <meta name="theme-color" content="#8ec9ee" />
-<title>Shiba Run — Japan Edition v1.3 · Shiba Wardrobe</title>
+<title>Shiba Run — Japan Edition v1.4 · iPhone Audio</title>
 <style>
 :root{color-scheme:light;--ink:#493321;--cream:#fff8e9;--orange:#ec8d41}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:#f7d89f;font-family:ui-rounded,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;-webkit-user-select:none;user-select:none}
@@ -77,12 +77,12 @@ function bindMenu(){
   const start=$('start');if(start)start.addEventListener('click',e=>{e.stopPropagation();reset()});
 }
 function showHome(){
- mode='ready';overlay.classList.remove('hidden');panel.classList.remove('shop-panel');
+ stopMusic();mode='ready';overlay.classList.remove('hidden');panel.classList.remove('shop-panel');
  panel.innerHTML=`<div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div>`;
  bindMenu();
 }
 function showShop(){
- mode='shop';overlay.classList.remove('hidden');panel.classList.add('shop-panel');
+ stopMusic();mode='shop';overlay.classList.remove('hidden');panel.classList.add('shop-panel');
  const rows=skinCatalog.map(s=>{
   const got=owned.includes(s.id),on=selectedSkin===s.id;
   const disabled=on||(!got&&wallet<s.price);
@@ -94,7 +94,7 @@ function showShop(){
  panel.querySelectorAll('[data-skin]').forEach(btn=>btn.addEventListener('click',e=>{
    e.stopPropagation();const id=btn.dataset.skin,s=skinCatalog.find(x=>x.id===id);
    if(!s)return;
-   if(!owned.includes(id)){if(wallet<s.price)return;wallet-=s.price;owned.push(id);beep(860,.13,'triangle',.10)}
+   if(!owned.includes(id)){if(wallet<s.price)return;wallet-=s.price;owned.push(id);playEffect('bone')}
    selectedSkin=id;saveWardrobe();showShop();
  }));
 }
@@ -118,6 +118,36 @@ const pick=a=>a[Math.random()*a.length|0];
 function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;c.width=Math.round(W*DPR);c.height=Math.round(H*DPR);c.style.width=W+'px';c.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0);scale=Math.max(.75,Math.min(1.34,W/400));ground=Math.round(H*.75);if(H<560)ground=H*.79;dog.x=Math.max(66,W*.22);if(mode!=='playing')dog.y=ground-24*scale;}
 window.addEventListener('resize',resize,{passive:true});resize();
 let audio;
+// HTMLMediaElement playback is more dependable for iOS Safari, including silent-mode devices.
+const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const themeMusic=new Audio('audio/shiba-theme.wav');
+themeMusic.loop=true;themeMusic.preload='auto';themeMusic.volume=.34;
+const audioEffects={};
+for(const key of ['jump','double','bone','hit']){
+  const el=new Audio('audio/'+key+'.wav'); el.preload='auto';el.volume=.65;
+  audioEffects[key]=el;
+}
+function playEffect(key){
+  if(muted)return;
+  if(isiOS){
+    const original=audioEffects[key];if(!original)return;
+    // A clone permits rapid repeat events without interrupting the last effect.
+    const sound=original.cloneNode();sound.volume=.72;
+    const p=sound.play();if(p&&p.catch)p.catch(()=>{});
+  }else{
+    const settings={jump:[520,.11,'triangle',.065],double:[720,.11,'triangle',.065],bone:[850,.12,'sine',.065],hit:[170,.26,'sawtooth',.13]};
+    beep(...(settings[key]||settings.jump));
+  }
+}
+function startMusic(){
+  if(muted||mode!=='playing')return;
+  themeMusic.muted=false;
+  const p=themeMusic.play();if(p&&p.catch)p.catch(()=>{});
+}
+function stopMusic(){themeMusic.pause();}
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)stopMusic();else if(mode==='playing'&&!muted)startMusic();
+});
 // iOS Safari requires starting/resuming Web Audio from a real user gesture.
 function unlockAudio(){
   if(muted)return;
@@ -145,14 +175,14 @@ function beep(freq=500,dur=.08,type='sine',volume=.07){
 // Unlock on pointer and touch gestures; keep controls and gameplay untouched.
 document.addEventListener('pointerdown',unlockAudio,{passive:true});
 document.addEventListener('touchstart',unlockAudio,{passive:true});
-$('sound').onclick=e=>{e.stopPropagation();muted=!muted;$('sound').textContent=muted?'🔇':'🔊';if(!muted){unlockAudio();beep(740,.13,'triangle',.10)}};
-function reset(){mode='playing';clock=0;meters=0;bones=0;worldX=0;spawnTimer=1.1;objects=[];particles=[];shake=0;dog.y=ground-24*scale;dog.vy=0;dog.jumps=0;dog.rot=0;dog.anim='run_1';dog.animTime=0;dog.actionTime=0;dog.spinTime=0;gameOverDelay=0;scoreEl.textContent='0000';bonesEl.textContent='0';overlay.classList.add('hidden');tip.style.opacity='1'}
-function jump(){if(dog.jumps>=2)return;dog.vy=-(dog.jumps===0?595:525)*scale;dog.jumps++;dog.actionTime=0;dog.spinTime=0;anim(dog.jumps===1?'jump_launch':'double_jump');beep(dog.jumps===1?520:720,.11,'triangle',.065);for(let i=0;i<7;i++)particles.push({x:dog.x-20*scale,y:ground-6*scale,vx:rand(-70,30)*scale,vy:rand(-100,-10)*scale,life:.35,color:'#e7c38f',r:rand(2,5)*scale});}
+$('sound').onclick=e=>{e.stopPropagation();muted=!muted;$('sound').textContent=muted?'🔇':'🔊';if(muted){stopMusic()}else{unlockAudio();startMusic();playEffect('bone')}};
+function reset(){mode='playing';startMusic();clock=0;meters=0;bones=0;worldX=0;spawnTimer=1.1;objects=[];particles=[];shake=0;dog.y=ground-24*scale;dog.vy=0;dog.jumps=0;dog.rot=0;dog.anim='run_1';dog.animTime=0;dog.actionTime=0;dog.spinTime=0;gameOverDelay=0;scoreEl.textContent='0000';bonesEl.textContent='0';overlay.classList.add('hidden');tip.style.opacity='1'}
+function jump(){if(dog.jumps>=2)return;dog.vy=-(dog.jumps===0?595:525)*scale;dog.jumps++;dog.actionTime=0;dog.spinTime=0;anim(dog.jumps===1?'jump_launch':'double_jump');playEffect(dog.jumps===1?'jump':'double');for(let i=0;i<7;i++)particles.push({x:dog.x-20*scale,y:ground-6*scale,vx:rand(-70,30)*scale,vy:rand(-100,-10)*scale,life:.35,color:'#e7c38f',r:rand(2,5)*scale});}
 function action(e){if(e&&e.cancelable)e.preventDefault();if(mode==='playing')jump();else if(mode==='ready'||mode==='over')reset()}
 c.addEventListener('pointerdown',action);$('start').addEventListener('pointerdown',e=>e.stopPropagation());document.addEventListener('keydown',e=>{if(['Space','ArrowUp','KeyW'].includes(e.code)){if(e.repeat)return;action(e)}});
 function makeObstacle(){const size=rand(25,40)*scale;objects.push({type:pick(['cone','bush','cone','log']),x:W+60*scale,y:ground,w:size*(Math.random()>.7?1.3:1),h:size,hit:false});if(Math.random()<.7){const amount=Math.random()<.25?3:1;for(let i=0;i<amount;i++)objects.push({type:'bone',x:W+(amount===1?20:i*34)*scale+60*scale,y:ground-rand(87,140)*scale,w:20*scale,h:18*scale,hit:false})}}
 function puff(x,y,color,n=9){for(let i=0;i<n;i++)particles.push({x,y,vx:rand(-170,170)*scale,vy:rand(-240,-60)*scale,life:rand(.3,.65),color,r:rand(3,7)*scale})}
-function gameOver(){mode='over';gameOverDelay=.62;anim('hurt');shake=9;beep(170,.26,'sawtooth',.13);if(Math.floor(meters)>best){best=Math.floor(meters);try{localStorage.setItem('shiba-run-best',best)}catch(e){}}bestEl.textContent=String(best).padStart(4,'0');panel.innerHTML=`<div class="eyebrow">THE ADVENTURE ENDS</div><h1>OOPS! 🐕</h1><p>Our brave shiba has met an obstacle.</p><div class="results"><div><small>DISTANCE</small>${Math.floor(meters)} m</div><div><small>BONES</small>${bones} 🦴</div></div><button id="start">TRY AGAIN →</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP TO TRY AGAIN</div>`;bindMenu()}
+function gameOver(){stopMusic();mode='over';gameOverDelay=.62;anim('hurt');shake=9;playEffect('hit');if(Math.floor(meters)>best){best=Math.floor(meters);try{localStorage.setItem('shiba-run-best',best)}catch(e){}}bestEl.textContent=String(best).padStart(4,'0');panel.innerHTML=`<div class="eyebrow">THE ADVENTURE ENDS</div><h1>OOPS! 🐕</h1><p>Our brave shiba has met an obstacle.</p><div class="results"><div><small>DISTANCE</small>${Math.floor(meters)} m</div><div><small>BONES</small>${bones} 🦴</div></div><button id="start">TRY AGAIN →</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP TO TRY AGAIN</div>`;bindMenu()}
 function update(dt){clock+=dt;dog.animTime+=dt;dog.actionTime+=dt;shake=Math.max(0,shake-dt*15);
 if(mode!=='playing'){
 if(mode==='ready'){anim('idle');dog.y=ground-24*scale+Math.sin(clock*3)*2;}
@@ -163,7 +193,7 @@ const speed=(250+Math.min(220,meters*.20))*scale;worldX+=speed*dt;meters+=speed*
 if(dog.jumps===0){if(dog.anim==='landing'&&dog.actionTime<.14){}else if(dog.anim==='collect'&&dog.actionTime<.28){}else anim('run_1')}
 else if(dog.jumps===2){anim('double_jump');dog.spinTime+=dt}
 else if(dog.actionTime<.11)anim('jump_launch');else anim('jump_air');
- for(let i=objects.length-1;i>=0;i--){const o=objects[i];o.x-=speed*dt;if(o.x<-100){objects.splice(i,1);continue}if(o.hit)continue;const dx=Math.abs(o.x-dog.x),feet=dog.y+24*scale,bodyTop=dog.y-20*scale;if(o.type==='bone'){if(dx<27*scale&&Math.abs(dog.y-o.y)<34*scale){o.hit=true;if(dog.jumps===0){anim('collect');dog.actionTime=0}bones++;wallet++;saveWardrobe();bonesEl.textContent=bones;beep(850,.12,'sine',.065);puff(o.x,o.y,'#ffca57',8);objects.splice(i,1)}}else{if(dx<((o.w*.47)+(13*scale))&&feet>ground-o.h+8*scale&&bodyTop<ground-5*scale){puff(dog.x+12*scale,dog.y,'#fff2d7',14);gameOver();break}}}
+ for(let i=objects.length-1;i>=0;i--){const o=objects[i];o.x-=speed*dt;if(o.x<-100){objects.splice(i,1);continue}if(o.hit)continue;const dx=Math.abs(o.x-dog.x),feet=dog.y+24*scale,bodyTop=dog.y-20*scale;if(o.type==='bone'){if(dx<27*scale&&Math.abs(dog.y-o.y)<34*scale){o.hit=true;if(dog.jumps===0){anim('collect');dog.actionTime=0}bones++;wallet++;saveWardrobe();bonesEl.textContent=bones;playEffect('bone');puff(o.x,o.y,'#ffca57',8);objects.splice(i,1)}}else{if(dx<((o.w*.47)+(13*scale))&&feet>ground-o.h+8*scale&&bodyTop<ground-5*scale){puff(dog.x+12*scale,dog.y,'#fff2d7',14);gameOver();break}}}
  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=450*scale*dt;p.life-=dt;if(p.life<=0)particles.splice(i,1)} }
 function rounded(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
 function ellipse(x,y,rx,ry,color){ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill()}
