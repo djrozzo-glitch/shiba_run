@@ -101,86 +101,72 @@ const skinCatalog=[
   {id:'hotdog',name:'Hot Dog Shiba',price:75,image:'skins/hotdog-atlas.png'}
 ];
 const WORLD_CATALOG=[
- {id:'tokyo',name:'Tokyo',tag:'JP',dayBg:'backgrounds/day-street.webp',nightBg:'backgrounds/night-street.webp',road:'warm',desc:'Sakura streets, cats and ramen'},
- {id:'newyork',name:'New York',tag:'USA',dayBg:'worlds/ny_day/day.webp',nightBg:'worlds/ny_night/night.webp',road:'city',desc:'Burgers by day, rats by night',dayObstacles:[
-
-    {id:'burger',path:'worlds/ny_day/burger.png',weight:18,w:68,hitW:.78,hitH:.78,level:0},
-    {id:'coffee',path:'worlds/ny_day/coffee.png',weight:15,w:54,hitW:.62,hitH:.82,level:0},
-    {id:'hydrant',path:'worlds/ny_day/hydrant.png',weight:14,w:60,hitW:.72,hitH:.82,level:1},
-    {id:'pizza_box',path:'worlds/ny_day/pizza_box.png',weight:12,w:72,hitW:.82,hitH:.70,level:1}
+ {id:'tokyo',name:'Tokyo',tag:'JP',dayBg:'backgrounds/day-street.webp',nightBg:'backgrounds/night-street.webp',road:'warm',desc:'Lanterns, cats, ramen signs and sakura bonsai'},
+ {id:'newyork',name:'New York',tag:'USA',dayBg:'worlds/ny_day/day.webp',nightBg:'worlds/ny_night/night.webp',road:'city',desc:'Cabs, hydrants, subway stairs and overflowing bins',dayObstacles:[
+    {id:'taxi',path:'worlds/newyork/taxi.png',weight:18,w:84,hitW:.82,hitH:.68,level:0},
+    {id:'hydrant',path:'worlds/newyork/hydrant.png',weight:16,w:62,hitW:.72,hitH:.84,level:0},
+    {id:'subway_entrance',path:'worlds/newyork/subway_entrance.png',weight:12,w:86,hitW:.84,hitH:.80,level:1},
+    {id:'trash_can',path:'worlds/newyork/trash_can.png',weight:13,w:70,hitW:.78,hitH:.82,level:1}
   ],nightObstacles:[
-
-    {id:'rat',path:'worlds/ny_night/rat.png',weight:18,w:58,hitW:.72,hitH:.62,level:0},
-    {id:'trash_bags',path:'worlds/ny_night/trash_bags.png',weight:14,w:70,hitW:.82,hitH:.77,level:0},
-    {id:'manhole',path:'worlds/ny_night/manhole.png',weight:14,w:72,hitW:.80,hitH:.40,level:1},
-    {id:'open_pizza_box',path:'worlds/ny_night/open_pizza_box.png',weight:12,w:76,hitW:.84,hitH:.68,level:1}
+    {id:'trash_can',path:'worlds/newyork/trash_can.png',weight:18,w:70,hitW:.78,hitH:.82,level:0},
+    {id:'hydrant',path:'worlds/newyork/hydrant.png',weight:15,w:62,hitW:.72,hitH:.84,level:0},
+    {id:'taxi',path:'worlds/newyork/taxi.png',weight:12,w:84,hitW:.82,hitH:.68,level:1},
+    {id:'subway_entrance',path:'worlds/newyork/subway_entrance.png',weight:12,w:86,hitW:.84,hitH:.80,level:1}
    ]},
- {id:'moscow',name:'Moscow',tag:'RU',dayBg:'worlds/moscow_day/day.webp',nightBg:'worlds/moscow_night/night.webp',road:'warm',desc:'Matryoshkas by day, shawarma by night',dayObstacles:[
-
-    {id:'militsiya_helmet',path:'worlds/moscow_day/militsiya_helmet.png',weight:16,w:60,hitW:.72,hitH:.78,level:0},
-    {id:'samovar',path:'worlds/moscow_day/samovar.png',weight:14,w:60,hitW:.72,hitH:.82,level:0},
-    {id:'matryoshka',path:'worlds/moscow_day/matryoshka.png',weight:16,w:58,hitW:.70,hitH:.86,level:1},
-    {id:'bubliki',path:'worlds/moscow_day/bubliki.png',weight:12,w:70,hitW:.84,hitH:.60,level:1}
+ {id:'moscow',name:'Moscow',tag:'RU',dayBg:'worlds/moscow_day/day.webp',nightBg:'worlds/moscow_night/night.webp',road:'warm',desc:'Samovars, matryoshkas, accordions and snowy benches',dayObstacles:[
+    {id:'samovar',path:'worlds/moscow/samovar.png',weight:16,w:66,hitW:.72,hitH:.84,level:0},
+    {id:'matryoshka',path:'worlds/moscow/matryoshka.png',weight:16,w:60,hitW:.70,hitH:.86,level:0},
+    {id:'accordion_case',path:'worlds/moscow/accordion_case.png',weight:12,w:82,hitW:.84,hitH:.72,level:1},
+    {id:'snowy_bench',path:'worlds/moscow/snowy_bench.png',weight:10,w:88,hitW:.86,hitH:.62,level:2}
   ],nightObstacles:[
-
-    {id:'shawarma',path:'worlds/moscow_night/shawarma.png',weight:17,w:70,hitW:.84,hitH:.62,level:0},
-    {id:'sleepy_cat',path:'worlds/moscow_night/sleepy_cat.png',weight:15,w:68,hitW:.78,hitH:.58,level:0},
-    {id:'bottle_crate',path:'worlds/moscow_night/bottle_crate.png',weight:12,w:66,hitW:.76,hitH:.80,level:1},
-    {id:'accordion_case',path:'worlds/moscow_night/accordion_case.png',weight:10,w:78,hitW:.84,hitH:.78,level:2}
+    {id:'accordion_case',path:'worlds/moscow/accordion_case.png',weight:16,w:82,hitW:.84,hitH:.72,level:0},
+    {id:'snowy_bench',path:'worlds/moscow/snowy_bench.png',weight:14,w:88,hitW:.86,hitH:.62,level:0},
+    {id:'matryoshka',path:'worlds/moscow/matryoshka.png',weight:12,w:60,hitW:.70,hitH:.86,level:1},
+    {id:'samovar',path:'worlds/moscow/samovar.png',weight:10,w:66,hitW:.72,hitH:.84,level:1}
    ]},
- {id:'rome',name:'Rome',tag:'IT',dayBg:'worlds/rome/day.webp',nightBg:'worlds/rome/night.webp',road:'warm',desc:'Gelato, pizza and ancient ruins',dayObstacles:[
-
-    {id:'gelato',path:'worlds/rome/gelato.png',weight:16,w:56,hitW:.62,hitH:.70,level:0},
-    {id:'roman_helmet',path:'worlds/rome/roman_helmet.png',weight:15,w:62,hitW:.74,hitH:.80,level:0},
-    {id:'pizza_slice',path:'worlds/rome/pizza_slice.png',weight:15,w:66,hitW:.82,hitH:.62,level:1},
-    {id:'column_fragment',path:'worlds/rome/column_fragment.png',weight:10,w:84,hitW:.86,hitH:.72,level:2}
+ {id:'rome',name:'Rome',tag:'IT',dayBg:'worlds/rome/day.webp',nightBg:'worlds/rome/night.webp',road:'warm',desc:'Scooters, fountains, helmets and old Roman ruins',dayObstacles:[
+    {id:'scooter',path:'worlds/rome/scooter.png',weight:16,w:80,hitW:.82,hitH:.66,level:0},
+    {id:'roman_helmet',path:'worlds/rome/roman_helmet.png',weight:15,w:66,hitW:.74,hitH:.80,level:0},
+    {id:'fountain',path:'worlds/rome/fountain.png',weight:12,w:86,hitW:.84,hitH:.74,level:1},
+    {id:'column_fragment',path:'worlds/rome/column_fragment.png',weight:12,w:82,hitW:.82,hitH:.82,level:2}
   ],nightObstacles:[
-
-    {id:'gelato',path:'worlds/rome/gelato.png',weight:16,w:56,hitW:.62,hitH:.70,level:0},
-    {id:'roman_helmet',path:'worlds/rome/roman_helmet.png',weight:15,w:62,hitW:.74,hitH:.80,level:0},
-    {id:'pizza_slice',path:'worlds/rome/pizza_slice.png',weight:15,w:66,hitW:.82,hitH:.62,level:1},
-    {id:'column_fragment',path:'worlds/rome/column_fragment.png',weight:10,w:84,hitW:.86,hitH:.72,level:2}
+    {id:'roman_helmet',path:'worlds/rome/roman_helmet.png',weight:16,w:66,hitW:.74,hitH:.80,level:0},
+    {id:'scooter',path:'worlds/rome/scooter.png',weight:14,w:80,hitW:.82,hitH:.66,level:0},
+    {id:'column_fragment',path:'worlds/rome/column_fragment.png',weight:12,w:82,hitW:.82,hitH:.82,level:1},
+    {id:'fountain',path:'worlds/rome/fountain.png',weight:10,w:86,hitW:.84,hitH:.74,level:2}
    ]},
- {id:'madrid',name:'Madrid',tag:'ES',dayBg:'worlds/madrid/day.webp',nightBg:'worlds/madrid/night.webp',road:'warm',desc:'Tapas, churros and football',dayObstacles:[
-
-    {id:'tapas',path:'worlds/madrid/tapas.png',weight:15,w:68,hitW:.82,hitH:.65,level:0},
-    {id:'churros',path:'worlds/madrid/churros.png',weight:16,w:60,hitW:.72,hitH:.82,level:0},
-    {id:'fan',path:'worlds/madrid/fan.png',weight:13,w:62,hitW:.78,hitH:.74,level:1},
-    {id:'soccer_ball',path:'worlds/madrid/soccer_ball.png',weight:12,w:56,hitW:.74,hitH:.74,level:1}
+ {id:'madrid',name:'Madrid',tag:'ES',dayBg:'worlds/madrid/day.webp',nightBg:'worlds/madrid/night.webp',road:'warm',desc:'Fans, orange trees, guitars and watchful bulls',dayObstacles:[
+    {id:'fan',path:'worlds/madrid/fan.png',weight:16,w:74,hitW:.84,hitH:.68,level:0},
+    {id:'orange_tree',path:'worlds/madrid/orange_tree.png',weight:13,w:78,hitW:.76,hitH:.88,level:1},
+    {id:'guitar',path:'worlds/madrid/guitar.png',weight:14,w:74,hitW:.76,hitH:.82,level:1},
+    {id:'bull_statue',path:'worlds/madrid/bull_statue.png',weight:10,w:88,hitW:.84,hitH:.72,level:2}
   ],nightObstacles:[
-
-    {id:'tapas',path:'worlds/madrid/tapas.png',weight:15,w:68,hitW:.82,hitH:.65,level:0},
-    {id:'churros',path:'worlds/madrid/churros.png',weight:16,w:60,hitW:.72,hitH:.82,level:0},
-    {id:'fan',path:'worlds/madrid/fan.png',weight:13,w:62,hitW:.78,hitH:.74,level:1},
-    {id:'soccer_ball',path:'worlds/madrid/soccer_ball.png',weight:12,w:56,hitW:.74,hitH:.74,level:1}
+    {id:'bull_statue',path:'worlds/madrid/bull_statue.png',weight:14,w:88,hitW:.84,hitH:.72,level:0},
+    {id:'fan',path:'worlds/madrid/fan.png',weight:14,w:74,hitW:.84,hitH:.68,level:0},
+    {id:'guitar',path:'worlds/madrid/guitar.png',weight:14,w:74,hitW:.76,hitH:.82,level:1},
+    {id:'orange_tree',path:'worlds/madrid/orange_tree.png',weight:10,w:78,hitW:.76,hitH:.88,level:2}
    ]},
- {id:'berlin',name:'Berlin',tag:'DE',dayBg:'worlds/berlin/day.webp',nightBg:'worlds/berlin/night.webp',road:'city',desc:'Currywurst, pretzels and boomboxes',dayObstacles:[
-
-    {id:'currywurst',path:'worlds/berlin/currywurst.png',weight:16,w:72,hitW:.82,hitH:.65,level:0},
-    {id:'doner',path:'worlds/berlin/doner.png',weight:15,w:72,hitW:.80,hitH:.78,level:0},
-    {id:'pretzel',path:'worlds/berlin/pretzel.png',weight:14,w:66,hitW:.82,hitH:.66,level:1},
-    {id:'boombox',path:'worlds/berlin/boombox.png',weight:10,w:80,hitW:.82,hitH:.76,level:2}
+ {id:'berlin',name:'Berlin',tag:'DE',dayBg:'worlds/berlin/day.webp',nightBg:'worlds/berlin/night.webp',road:'city',desc:'Ampelmännchen, e-scooters, pretzels and currywurst',dayObstacles:[
+    {id:'walk_signal',path:'worlds/berlin/walk_signal.png',weight:14,w:74,hitW:.72,hitH:.84,level:0},
+    {id:'escooter',path:'worlds/berlin/escooter.png',weight:14,w:82,hitW:.80,hitH:.76,level:0},
+    {id:'pretzel',path:'worlds/berlin/pretzel.png',weight:15,w:70,hitW:.82,hitH:.68,level:1},
+    {id:'currywurst',path:'worlds/berlin/currywurst.png',weight:12,w:74,hitW:.82,hitH:.62,level:1}
   ],nightObstacles:[
-
-    {id:'currywurst',path:'worlds/berlin/currywurst.png',weight:16,w:72,hitW:.82,hitH:.65,level:0},
-    {id:'doner',path:'worlds/berlin/doner.png',weight:15,w:72,hitW:.80,hitH:.78,level:0},
-    {id:'pretzel',path:'worlds/berlin/pretzel.png',weight:14,w:66,hitW:.82,hitH:.66,level:1},
-    {id:'boombox',path:'worlds/berlin/boombox.png',weight:10,w:80,hitW:.82,hitH:.76,level:2}
-   ]}
- ,{id:'amsterdam',name:'Amsterdam',tag:'NL',dayBg:'worlds/amsterdam/day.webp',nightBg:'worlds/amsterdam/night.webp',road:'city',desc:'Canals, tulips, gulls and wonderfully bad decisions',dayObstacles:[
-    {id:'tulip_bike',path:'worlds/amsterdam/tulip_bike.png',weight:12,w:79,hitW:.77,hitH:.66,level:1},
-    {id:'gouda_cheese',path:'worlds/amsterdam/gouda_cheese.png',weight:19,w:69,hitW:.78,hitH:.70,level:0},
-    {id:'wooden_clogs',path:'worlds/amsterdam/wooden_clogs.png',weight:17,w:68,hitW:.80,hitH:.62,level:0},
-    {id:'fallen_friet',path:'worlds/amsterdam/fallen_friet.png',weight:14,w:60,hitW:.70,hitH:.71,level:1},
-    {id:'cheeky_seagull',path:'worlds/amsterdam/cheeky_seagull.png',weight:10,w:65,hitW:.70,hitH:.70,level:2},
-    {id:'suspicious_plant',path:'worlds/amsterdam/suspicious_plant.png',weight:8,w:55,hitW:.62,hitH:.79,level:2}
+    {id:'escooter',path:'worlds/berlin/escooter.png',weight:16,w:82,hitW:.80,hitH:.76,level:0},
+    {id:'walk_signal',path:'worlds/berlin/walk_signal.png',weight:13,w:74,hitW:.72,hitH:.84,level:0},
+    {id:'currywurst',path:'worlds/berlin/currywurst.png',weight:14,w:74,hitW:.82,hitH:.62,level:1},
+    {id:'pretzel',path:'worlds/berlin/pretzel.png',weight:12,w:70,hitW:.82,hitH:.68,level:1}
+   ]},
+ {id:'amsterdam',name:'Amsterdam',tag:'NL',dayBg:'worlds/amsterdam/day.webp',nightBg:'worlds/amsterdam/night.webp',road:'city',desc:'Bikes, clogs, canal posts and tulip crates',dayObstacles:[
+    {id:'tulip_bike',path:'worlds/amsterdam/tulip_bike.png',weight:16,w:82,hitW:.82,hitH:.68,level:0},
+    {id:'wooden_clogs',path:'worlds/amsterdam/wooden_clogs.png',weight:16,w:74,hitW:.82,hitH:.60,level:0},
+    {id:'canal_post_gull',path:'worlds/amsterdam/canal_post_gull.png',weight:12,w:66,hitW:.74,hitH:.86,level:1},
+    {id:'tulip_crate',path:'worlds/amsterdam/tulip_crate.png',weight:12,w:78,hitW:.82,hitH:.72,level:1}
   ],nightObstacles:[
-    {id:'cheeky_seagull',path:'worlds/amsterdam/cheeky_seagull.png',weight:18,w:65,hitW:.70,hitH:.70,level:0},
-    {id:'fallen_friet',path:'worlds/amsterdam/fallen_friet.png',weight:18,w:60,hitW:.70,hitH:.71,level:0},
-    {id:'suspicious_plant',path:'worlds/amsterdam/suspicious_plant.png',weight:14,w:55,hitW:.62,hitH:.79,level:1},
-    {id:'wooden_clogs',path:'worlds/amsterdam/wooden_clogs.png',weight:14,w:68,hitW:.80,hitH:.62,level:1},
-    {id:'tulip_bike',path:'worlds/amsterdam/tulip_bike.png',weight:10,w:79,hitW:.77,hitH:.66,level:2},
-    {id:'gouda_cheese',path:'worlds/amsterdam/gouda_cheese.png',weight:12,w:69,hitW:.78,hitH:.70,level:2}
+    {id:'canal_post_gull',path:'worlds/amsterdam/canal_post_gull.png',weight:16,w:66,hitW:.74,hitH:.86,level:0},
+    {id:'wooden_clogs',path:'worlds/amsterdam/wooden_clogs.png',weight:15,w:74,hitW:.82,hitH:.60,level:0},
+    {id:'tulip_bike',path:'worlds/amsterdam/tulip_bike.png',weight:14,w:82,hitW:.82,hitH:.68,level:1},
+    {id:'tulip_crate',path:'worlds/amsterdam/tulip_crate.png',weight:12,w:78,hitW:.82,hitH:.72,level:1}
   ]}
 ];
 const WORLD_MAP=Object.fromEntries(WORLD_CATALOG.map(w=>[w.id,w]));
@@ -391,26 +377,15 @@ function reset(){savedDogOnPause=null;mode='playing';syncPauseButton();startMusi
 function jump(){if(dog.jumps>=2)return;dog.vy=-(dog.jumps===0?595:525)*scale;dog.jumps++;dog.actionTime=0;dog.spinTime=0;anim(dog.jumps===1?'jump_launch':'double_jump');playEffect(dog.jumps===1?'jump':'double');for(let i=0;i<7;i++)particles.push({x:dog.x-20*scale,y:ground-6*scale,vx:rand(-70,30)*scale,vy:rand(-100,-10)*scale,life:.35,color:'#e7c38f',r:rand(2,5)*scale});}
 function action(e){if(e&&e.cancelable)e.preventDefault();if(mode==='playing')jump();else if(mode==='ready'||mode==='over')reset()}
 c.addEventListener('pointerdown',action);$('start').addEventListener('pointerdown',e=>e.stopPropagation());document.addEventListener('keydown',e=>{if(e.code==='KeyP'||e.code==='Escape'){if(e.repeat)return;togglePause();return}if(['Space','ArrowUp','KeyW'].includes(e.code)){if(e.repeat)return;action(e)}});
-// Eight distinct obstacles; weighted, tiered and individually sized for a mobile play lane.
+// Four clean standalone Tokyo obstacles in the new unified sticker style.
 const tokyoObstacleCatalog=[
- {id:'cone',path:'obstacles/cone.png',weight:18,w:54,hitW:.65,hitH:.83,level:0},
- {id:'sleeping_cat',path:'obstacles/sleeping_cat.png',weight:13,w:65,hitW:.73,hitH:.72,level:0},
- {id:'angry_cat',path:'obstacles/angry_cat.png',weight:11,w:62,hitW:.68,hitH:.85,level:1},
- {id:'tanuki',path:'obstacles/tanuki.png',weight:7,w:48,hitW:.68,hitH:.84,level:2},
- {id:'lantern',path:'obstacles/lantern.png',weight:14,w:65,hitW:.74,hitH:.66,level:0},
- {id:'boxes',path:'obstacles/boxes.png',weight:10,w:45,hitW:.78,hitH:.87,level:1},
- {id:'ramen',path:'obstacles/ramen.png',weight:16,w:44,hitW:.73,hitH:.55,level:0},
- {id:'umbrellas',path:'obstacles/umbrellas.png',weight:11,w:34,hitW:.68,hitH:.83,level:1}
+ {id:'lantern',path:'obstacles/lantern.png',weight:18,w:70,hitW:.76,hitH:.80,level:0},
+ {id:'sleeping_cat',path:'obstacles/sleeping_cat.png',weight:16,w:72,hitW:.78,hitH:.62,level:0},
+ {id:'ramen_sign',path:'obstacles/ramen_sign.png',weight:14,w:78,hitW:.76,hitH:.84,level:1},
+ {id:'sakura_bonsai',path:'obstacles/sakura_bonsai.png',weight:10,w:76,hitW:.80,hitH:.78,level:1}
 ];
-// Tight source rectangles keep Tokyo illustrations at their original proportions.
-const obstacleCrops={
- boxes:{x:12,y:52,w:232,h:191},
- cone:{x:12,y:32,w:232,h:211},
- lantern:{x:12,y:98,w:232,h:145},
- ramen:{x:12,y:84,w:232,h:159},
- tanuki:{x:12,y:75,w:232,h:168},
- umbrellas:{x:62,y:17,w:132,h:226},
-};
+// Standalone transparent PNGs do not need source cropping.
+const obstacleCrops={};
 function daylightAmount(){
  const cycle=((meters%420)+420)%420;
  if(cycle<185)return 0;
