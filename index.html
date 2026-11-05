@@ -399,11 +399,41 @@ function activeObstacleCatalog(){
  return daylightAmount()<.5?world.dayObstacles:world.nightObstacles;
 }
 const obstacleImages={};
-for(const spec of tokyoObstacleCatalog){const image=new Image();image.src=spec.path;obstacleImages[spec.id]=image}
+// Cache the ACTUAL visible pixels of each PNG. Generated sprites can have large
+// transparent margins (e.g. sleeping cat), which must never affect ground contact.
+const obstacleVisibleRects={};
+function detectVisibleRect(image){
+  const sw=image.naturalWidth,sh=image.naturalHeight;
+  const fallback={x:0,y:0,w:sw,h:sh};
+  if(!sw||!sh)return fallback;
+  try{
+    const buffer=document.createElement('canvas');
+    buffer.width=sw;buffer.height=sh;
+    const bctx=buffer.getContext('2d',{willReadFrequently:true});
+    bctx.drawImage(image,0,0);
+    const rgba=bctx.getImageData(0,0,sw,sh).data;
+    let left=sw,top=sh,right=-1,bottom=-1;
+    // Ignore near-invisible pixels while preserving anti-aliased outlines.
+    for(let y=0;y<sh;y++)for(let x=0;x<sw;x++){
+      if(rgba[(y*sw+x)*4+3]<16)continue;
+      if(x<left)left=x;if(x>right)right=x;
+      if(y<top)top=y;if(y>bottom)bottom=y;
+    }
+    if(right<left||bottom<top)return fallback;
+    return {x:left,y:top,w:right-left+1,h:bottom-top+1};
+  }catch(e){return fallback}
+}
+function registerObstacleImage(spec){
+  if(obstacleImages[spec.id])return;
+  const image=new Image();
+  image.onload=()=>{obstacleVisibleRects[spec.id]=detectVisibleRect(image)};
+  image.src=spec.path;
+  if(image.complete&&image.naturalWidth){obstacleVisibleRects[spec.id]=detectVisibleRect(image)}
+  obstacleImages[spec.id]=image;
+}
+for(const spec of tokyoObstacleCatalog)registerObstacleImage(spec);
 for(const world of WORLD_CATALOG){
- for(const spec of [...(world.dayObstacles||[]),...(world.nightObstacles||[])]){
-  const image=new Image();image.src=spec.path;obstacleImages[spec.id]=image;
- }
+  for(const spec of [...(world.dayObstacles||[]),...(world.nightObstacles||[])])registerObstacleImage(spec);
 }
 function chooseObstacle(){
  const difficulty=meters<110?0:meters<280?1:2;
@@ -413,11 +443,12 @@ function chooseObstacle(){
 }
 function makeObstacle(){
  const spec=chooseObstacle();
- const crop=obstacleCrops[spec.id];
  const image=obstacleImages[spec.id];
+ const rect=obstacleVisibleRects[spec.id];
  const width=spec.w*scale;
- const ratio=(crop?crop.h/crop.w:(image&&image.naturalWidth?image.naturalHeight/image.naturalWidth:1));
+ const ratio=rect?rect.h/rect.w:(image&&image.naturalWidth?image.naturalHeight/image.naturalWidth:1);
  const height=Math.max(18*scale,width*ratio);
+ // Same ground coordinate as Ozzy's feet (no per-city vertical offsets).
  objects.push({type:spec.id,x:W+68*scale,y:ground,w:width,h:height,hitW:spec.hitW,hitH:spec.hitH,hit:false});
  if(Math.random()<.7){const amount=Math.random()<.25?3:1;
   for(let i=0;i<amount;i++)objects.push({type:'bone',x:W+(amount===1?20:i*34)*scale+68*scale,y:ground-rand(87,140)*scale,w:20*scale,h:18*scale,hit:false})}
@@ -580,13 +611,12 @@ ctx.restore();
 function obstacle(o){
  const image=obstacleImages[o.type];
  if(image&&image.complete&&image.naturalWidth){
-  // Render only the illustrated pixels, maintaining each sprite's original aspect ratio.
-  // All obstacles use the same ground anchor; collision dimensions follow visible artwork.
-  const crop=obstacleCrops[o.type];
-  if(crop)ctx.drawImage(image,crop.x,crop.y,crop.w,crop.h,o.x-o.w/2,o.y-o.h,o.w,o.h);
-  else ctx.drawImage(image,o.x-o.w/2,o.y-o.h,o.w,o.h);
+  const rect=obstacleVisibleRects[o.type]||{x:0,y:0,w:image.naturalWidth,h:image.naturalHeight};
+  // This also repairs obstacles spawned before their PNG finished loading.
+  o.h=Math.max(18*scale,o.w*rect.h/rect.w);
+  // o.y is exactly the dog's ground line; render visible pixels down to that line.
+  ctx.drawImage(image,rect.x,rect.y,rect.w,rect.h,o.x-o.w/2,o.y-o.h,o.w,o.h);
  }else{
-  // Keep the obstacle visible if one image is missing or not yet loaded.
   rounded(o.x-o.w*.45,o.y-o.h,o.w*.9,o.h,6*scale,'#d77f42');
  }
 }
