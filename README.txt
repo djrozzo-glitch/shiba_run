@@ -1,9 +1,5 @@
-SHIBA RUN — MOBILE BROWSER
+Shiba Run v1.5 - Japan Obstacles & Audio Toggles
 
-Open index.html through a web server or upload the contents of this folder to GitHub Pages.
-Tap to jump. Tap again for a double jump. The Shiba Inu is animated using shiba-atlas.png.
-
-Sprite files: sprites/*.png
-Atlas metadata: shiba-atlas.json
-
-The game loads one atlas image; standalone PNGs and JSON are provided for editing and other engines.
+Deploy to the root of the shiba_run GitHub Pages repository.
+Replace index.html, upload the new obstacles/ folder, keep skins/, backgrounds/, audio/ and shiba-atlas.png.
+Includes 8 obstacle sprites, individually tuned hitboxes and weighted spawns, separate persisted music / SFX controls.

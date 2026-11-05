@@ -44,6 +44,18 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 #panel .shop-action{width:auto;font-size:12px;min-width:86px;padding:10px 7px;border-radius:11px;border-bottom-width:3px}
 #panel .shop-action:disabled{background:#d9cdbd;border-color:#c3b49f;color:#7a6e5d}
 #panel .hint{margin-top:7px}}
+
+.world-current{margin:6px 0 14px;font-size:12px;font-weight:900;color:#9a6b3c;text-align:center}
+.world-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.world-card{background:#fff;border:2px solid #f2dfc8;border-radius:16px;padding:8px;display:flex;flex-direction:column;gap:7px}
+.world-card.active{border-color:#efab64;box-shadow:0 0 0 3px #ffe2bd inset}
+.world-thumb{height:78px;border-radius:12px;background-size:cover;background-position:center;border:1px solid #f0e2d0}
+.world-meta{font-size:12px;font-weight:900;color:#5b412d;line-height:1.2}
+.world-meta small{display:block;font-size:10px;color:#9b7656;margin-top:3px;font-weight:800}
+.world-pick{width:100%;padding:10px 8px;border-radius:12px;border:0;border-bottom:3px solid #be601d;background:#e98938;color:#fff;font-size:12px;font-weight:950}
+.world-pick.alt{background:#fff1d9;color:#86542d;border:2px solid #f5d0a3;border-bottom:4px solid #dbad7e}
+.world-pick:disabled{background:#d7caba;color:#7e715f;border-bottom-color:#c0ad93}
+@media(max-width:430px){.world-grid{gap:8px}.world-card{padding:7px}.world-thumb{height:64px}.world-meta{font-size:11px}.world-pick{font-size:11px;padding:9px 6px}}
 </style>
 </head>
 <body>
@@ -66,22 +78,73 @@ const skinCatalog=[
   {id:'samurai',name:'Samurai Shiba',price:50,image:'skins/samurai-atlas.png'},
   {id:'hotdog',name:'Hot Dog Shiba',price:75,image:'skins/hotdog-atlas.png'}
 ];
+const WORLD_CATALOG=[
+  {id:'tokyo',name:'Tokyo Sakura',tag:'Original',preview:'backgrounds/day-street.webp',road:'tokyo',desc:'Day & night sakura streets'},
+  {id:'ny_day',name:'New York · Day',tag:'USA',preview:'worlds/ny_day/bg.png',bg:'worlds/ny_day/bg.png',road:'city',desc:'Brownstones, deli vibes, burgers',obstacles:[
+    {id:'burger',path:'worlds/ny_day/burger.png',weight:18,w:42,hitW:.78,hitH:.78,level:0},
+    {id:'coffee',path:'worlds/ny_day/coffee.png',weight:15,w:27,hitW:.62,hitH:.82,level:0},
+    {id:'hydrant',path:'worlds/ny_day/hydrant.png',weight:14,w:33,hitW:.72,hitH:.82,level:1},
+    {id:'pizza_box',path:'worlds/ny_day/pizza_box.png',weight:12,w:45,hitW:.82,hitH:.70,level:1}
+  ]},
+  {id:'ny_night',name:'New York · Night',tag:'USA',preview:'worlds/ny_night/bg.png',bg:'worlds/ny_night/bg.png',road:'night',desc:'Neon skyline, rats, steam, pizza',obstacles:[
+    {id:'rat',path:'worlds/ny_night/rat.png',weight:18,w:34,hitW:.72,hitH:.62,level:0},
+    {id:'trash_bags',path:'worlds/ny_night/trash_bags.png',weight:14,w:44,hitW:.82,hitH:.77,level:0},
+    {id:'manhole',path:'worlds/ny_night/manhole.png',weight:14,w:42,hitW:.80,hitH:.40,level:1},
+    {id:'open_pizza_box',path:'worlds/ny_night/open_pizza_box.png',weight:12,w:46,hitW:.84,hitH:.68,level:1}
+  ]},
+  {id:'moscow_day',name:'Moscow · Day',tag:'RU',preview:'worlds/moscow_day/bg.png',bg:'worlds/moscow_day/bg.png',road:'warm',desc:'Red walls, domes, samovar energy',obstacles:[
+    {id:'militsiya_helmet',path:'worlds/moscow_day/militsiya_helmet.png',weight:16,w:34,hitW:.72,hitH:.78,level:0},
+    {id:'samovar',path:'worlds/moscow_day/samovar.png',weight:14,w:33,hitW:.72,hitH:.82,level:0},
+    {id:'matryoshka',path:'worlds/moscow_day/matryoshka.png',weight:16,w:31,hitW:.70,hitH:.86,level:1},
+    {id:'bubliki',path:'worlds/moscow_day/bubliki.png',weight:12,w:43,hitW:.84,hitH:.60,level:1}
+  ]},
+  {id:'moscow_night',name:'Moscow · Night',tag:'RU',preview:'worlds/moscow_night/bg.png',bg:'worlds/moscow_night/bg.png',road:'night',desc:'Moonlit embankment chaos',obstacles:[
+    {id:'shawarma',path:'worlds/moscow_night/shawarma.png',weight:17,w:44,hitW:.84,hitH:.62,level:0},
+    {id:'sleepy_cat',path:'worlds/moscow_night/sleepy_cat.png',weight:15,w:42,hitW:.78,hitH:.58,level:0},
+    {id:'bottle_crate',path:'worlds/moscow_night/bottle_crate.png',weight:12,w:38,hitW:.76,hitH:.80,level:1},
+    {id:'accordion_case',path:'worlds/moscow_night/accordion_case.png',weight:10,w:47,hitW:.84,hitH:.78,level:2}
+  ]},
+  {id:'rome',name:'Rome',tag:'IT',preview:'worlds/rome/bg.png',bg:'worlds/rome/bg.png',road:'warm',desc:'Cobblestones, gelato and ruins',obstacles:[
+    {id:'gelato',path:'worlds/rome/gelato.png',weight:16,w:30,hitW:.62,hitH:.70,level:0},
+    {id:'roman_helmet',path:'worlds/rome/roman_helmet.png',weight:15,w:36,hitW:.74,hitH:.80,level:0},
+    {id:'pizza_slice',path:'worlds/rome/pizza_slice.png',weight:15,w:41,hitW:.82,hitH:.62,level:1},
+    {id:'column_fragment',path:'worlds/rome/column_fragment.png',weight:10,w:49,hitW:.86,hitH:.72,level:2}
+  ]},
+  {id:'madrid',name:'Madrid',tag:'ES',preview:'worlds/madrid/bg.png',bg:'worlds/madrid/bg.png',road:'warm',desc:'Plaza, tapas, churros, football',obstacles:[
+    {id:'tapas',path:'worlds/madrid/tapas.png',weight:15,w:42,hitW:.82,hitH:.65,level:0},
+    {id:'churros',path:'worlds/madrid/churros.png',weight:16,w:34,hitW:.72,hitH:.82,level:0},
+    {id:'fan',path:'worlds/madrid/fan.png',weight:13,w:37,hitW:.78,hitH:.74,level:1},
+    {id:'soccer_ball',path:'worlds/madrid/soccer_ball.png',weight:12,w:34,hitW:.74,hitH:.74,level:1}
+  ]},
+  {id:'berlin',name:'Berlin',tag:'DE',preview:'worlds/berlin/bg.png',bg:'worlds/berlin/bg.png',road:'city',desc:'Canals, U-Bahn and street food',obstacles:[
+    {id:'currywurst',path:'worlds/berlin/currywurst.png',weight:16,w:42,hitW:.82,hitH:.65,level:0},
+    {id:'doner',path:'worlds/berlin/doner.png',weight:15,w:41,hitW:.80,hitH:.78,level:0},
+    {id:'pretzel',path:'worlds/berlin/pretzel.png',weight:14,w:40,hitW:.82,hitH:.66,level:1},
+    {id:'boombox',path:'worlds/berlin/boombox.png',weight:10,w:46,hitW:.82,hitH:.76,level:2}
+  ]}
+];
+const WORLD_MAP=Object.fromEntries(WORLD_CATALOG.map(w=>[w.id,w]));
 const skinImages={};for(const skin of skinCatalog){const im=new Image();im.src=skin.image;skinImages[skin.id]=im;}
-let wallet=0,owned=['classic'],selectedSkin='classic';
+let wallet=0,owned=['classic'],selectedSkin='classic',selectedWorld='tokyo';
 try{
   wallet=Math.max(0,Number(localStorage.getItem('shiba-run-wallet')||0)||0);
   const saved=JSON.parse(localStorage.getItem('shiba-run-owned')||'["classic"]');
   if(Array.isArray(saved))owned=['classic',...saved.filter(v=>skinCatalog.some(s=>s.id===v))];
   const sel=localStorage.getItem('shiba-run-skin');if(owned.includes(sel))selectedSkin=sel;
+  const worldSel=localStorage.getItem('shiba-run-world');if(WORLD_MAP[worldSel])selectedWorld=worldSel;
 }catch(e){}
+function currentWorld(){return WORLD_MAP[selectedWorld]||WORLD_CATALOG[0]}
 function saveWardrobe(){try{localStorage.setItem('shiba-run-wallet',String(wallet));localStorage.setItem('shiba-run-owned',JSON.stringify(owned));localStorage.setItem('shiba-run-skin',selectedSkin)}catch(e){}}
+function saveWorld(){try{localStorage.setItem('shiba-run-world',selectedWorld)}catch(e){}}
 function bindMenu(){
   const open=$('openShop');if(open)open.addEventListener('click',e=>{e.stopPropagation();showShop()});
+  const worlds=$('openWorlds');if(worlds)worlds.addEventListener('click',e=>{e.stopPropagation();showWorlds()});
   const start=$('start');if(start)start.addEventListener('click',e=>{e.stopPropagation();reset()});
 }
 function showHome(){
  stopMusic();mode='ready';overlay.classList.remove('hidden');panel.classList.remove('shop-panel');
- panel.innerHTML=`<div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div>`;
+ const world=currentWorld();
+ panel.innerHTML=`<div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><div class="world-current">CURRENT SETTING · <strong>${world.name}</strong></div><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openWorlds">🌍 CHOOSE SETTING</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div>`;
  bindMenu();
 }
 function showShop(){
@@ -92,7 +155,7 @@ function showShop(){
   const txt=on?'EQUIPPED':got?'EQUIP':`🦴 ${s.price}`;
   return `<div class="shop-row"><div class="shop-pic" style="background-image:url('${s.image}')"></div><div class="shop-meta">${s.name}<small>${on?'Currently wearing':got?'Unlocked':s.price+' bones'}</small></div><button class="shop-action" data-skin="${s.id}" ${disabled?'disabled':''}>${txt}</button></div>`;
  }).join('');
- panel.innerHTML=`<div class="eyebrow" style="text-align:center">COSTUME SHOP</div><h1>SHIBA WARDROBE</h1><div class="shop-balance">🦴 YOUR BONES: ${wallet}</div>${rows}<button class="shop-btn" id="backHome">← BACK TO GAME</button><div class="hint" style="text-align:center">Costumes are cosmetic · Saved on this device</div>`;
+ panel.innerHTML=`<div class="eyebrow" style="text-align:center">COSTUME SHOP</div><h1>SHIBA WARDROBE</h1><div class="shop-balance">🦴 YOUR BONES: ${wallet}</div>${rows}<button class="shop-btn" id="backHome">← BACK TO MENU</button><div class="hint" style="text-align:center">Costumes are cosmetic · Saved on this device</div>`;
  $('backHome').addEventListener('click',e=>{e.stopPropagation();showHome()});
  panel.querySelectorAll('[data-skin]').forEach(btn=>btn.addEventListener('click',e=>{
    e.stopPropagation();const id=btn.dataset.skin,s=skinCatalog.find(x=>x.id===id);
@@ -101,13 +164,31 @@ function showShop(){
    selectedSkin=id;saveWardrobe();showShop();
  }));
 }
+function showWorlds(){
+ stopMusic();mode='worlds';overlay.classList.remove('hidden');panel.classList.add('shop-panel');
+ const rows=WORLD_CATALOG.map(w=>{
+   const active=w.id===selectedWorld;
+   return `<div class="world-card ${active?'active':''}"><div class="world-thumb" style="background-image:url('${w.preview}')"></div><div class="world-meta">${w.name}<small>${w.desc}</small></div><button class="world-pick ${active?'alt':''}" data-world="${w.id}" ${active?'disabled':''}>${active?'SELECTED':'CHOOSE'}</button></div>`;
+ }).join('');
+ panel.innerHTML=`<div class="eyebrow" style="text-align:center">LEVEL SELECT</div><h1>CHOOSE<br>SETTING</h1><div class="world-grid">${rows}</div><button class="shop-btn" id="backHome">← BACK TO MENU</button><div class="hint" style="text-align:center">Each setting has its own background and themed obstacles</div>`;
+ $('backHome').addEventListener('click',e=>{e.stopPropagation();showHome()});
+ panel.querySelectorAll('[data-world]').forEach(btn=>btn.addEventListener('click',e=>{
+   e.stopPropagation();const id=btn.dataset.world;if(!WORLD_MAP[id])return;selectedWorld=id;saveWorld();showWorlds();
+ }));
+}
 bindMenu();
 const spriteFrames={idle:0,run_1:1,run_2:2,run_3:3,run_4:4,jump_launch:5,jump_air:6,double_jump:7,landing:8,hurt:9,collect:10,game_over:11};
+
 // Mobile-friendly background layers; preload both themes so day/night transitions never stall.
 const cityImages={};
 for(const name of ['day-far','day-street','night-far','night-street']){
   const img=new Image(); img.decoding='async'; img.src='backgrounds/'+name+'.webp';
   cityImages[name]=img;
+}
+const worldBgImages={};
+for(const world of WORLD_CATALOG){
+  if(!world.bg)continue;
+  const img=new Image(); img.decoding='async'; img.src=world.bg; worldBgImages[world.id]=img;
 }
 // Lightweight animated cherry-blossom petals, generated on Canvas (no heavy animation textures).
 const rand=(a,b)=>a+Math.random()*(b-a);
@@ -187,17 +268,17 @@ function jump(){if(dog.jumps>=2)return;dog.vy=-(dog.jumps===0?595:525)*scale;dog
 function action(e){if(e&&e.cancelable)e.preventDefault();if(mode==='playing')jump();else if(mode==='ready'||mode==='over')reset()}
 c.addEventListener('pointerdown',action);$('start').addEventListener('pointerdown',e=>e.stopPropagation());document.addEventListener('keydown',e=>{if(['Space','ArrowUp','KeyW'].includes(e.code)){if(e.repeat)return;action(e)}});
 // Eight distinct obstacles; weighted, tiered and individually sized for a mobile play lane.
-const obstacleCatalog=[
- {id:'cone',weight:18,w:31,h:34,hitW:.65,hitH:.83,level:0},
- {id:'sleeping_cat',weight:13,w:47,h:26,hitW:.73,hitH:.72,level:0},
- {id:'angry_cat',weight:11,w:45,h:45,hitW:.68,hitH:.85,level:1},
- {id:'tanuki',weight:7,w:48,h:44,hitW:.68,hitH:.84,level:2},
- {id:'lantern',weight:14,w:37,h:30,hitW:.74,hitH:.66,level:0},
- {id:'boxes',weight:10,w:45,h:47,hitW:.78,hitH:.87,level:1},
- {id:'ramen',weight:16,w:44,h:25,hitW:.73,hitH:.55,level:0},
- {id:'umbrellas',weight:11,w:34,h:46,hitW:.68,hitH:.83,level:1}
+const tokyoObstacleCatalog=[
+ {id:'cone',path:'obstacles/cone.png',weight:18,w:31,hitW:.65,hitH:.83,level:0},
+ {id:'sleeping_cat',path:'obstacles/sleeping_cat.png',weight:13,w:47,hitW:.73,hitH:.72,level:0},
+ {id:'angry_cat',path:'obstacles/angry_cat.png',weight:11,w:45,hitW:.68,hitH:.85,level:1},
+ {id:'tanuki',path:'obstacles/tanuki.png',weight:7,w:48,hitW:.68,hitH:.84,level:2},
+ {id:'lantern',path:'obstacles/lantern.png',weight:14,w:37,hitW:.74,hitH:.66,level:0},
+ {id:'boxes',path:'obstacles/boxes.png',weight:10,w:45,hitW:.78,hitH:.87,level:1},
+ {id:'ramen',path:'obstacles/ramen.png',weight:16,w:44,hitW:.73,hitH:.55,level:0},
+ {id:'umbrellas',path:'obstacles/umbrellas.png',weight:11,w:34,hitW:.68,hitH:.83,level:1}
 ];
-// Tight source rectangles keep each illustration at its original proportions.
+// Tight source rectangles keep Tokyo illustrations at their original proportions.
 const obstacleCrops={
  angry_cat:{x:12,y:43,w:232,h:200},
  boxes:{x:12,y:52,w:232,h:191},
@@ -208,25 +289,32 @@ const obstacleCrops={
  tanuki:{x:12,y:75,w:232,h:168},
  umbrellas:{x:62,y:17,w:132,h:226},
 };
+function activeObstacleCatalog(){const world=currentWorld();return world.obstacles||tokyoObstacleCatalog}
 const obstacleImages={};
-for(const spec of obstacleCatalog){const image=new Image();image.src='obstacles/'+spec.id+'.png';obstacleImages[spec.id]=image}
+for(const spec of tokyoObstacleCatalog){const image=new Image();image.src=spec.path;obstacleImages[spec.id]=image}
+for(const world of WORLD_CATALOG){
+  if(!world.obstacles)continue;
+  for(const spec of world.obstacles){const image=new Image();image.src=spec.path;obstacleImages[spec.id]=image}
+}
 function chooseObstacle(){
  const difficulty=meters<110?0:meters<280?1:2;
- const pool=obstacleCatalog.filter(o=>o.level<=difficulty);
+ const pool=activeObstacleCatalog().filter(o=>o.level<=difficulty);
  const total=pool.reduce((s,o)=>s+o.weight,0);let value=Math.random()*total;
  for(const spec of pool){value-=spec.weight;if(value<0)return spec}return pool[0];
 }
 function makeObstacle(){
  const spec=chooseObstacle();
  const crop=obstacleCrops[spec.id];
+ const image=obstacleImages[spec.id];
  const width=spec.w*scale;
- const height=crop?width*crop.h/crop.w:spec.h*scale;
+ const ratio=(crop?crop.h/crop.w:(image&&image.naturalWidth?image.naturalHeight/image.naturalWidth:1));
+ const height=Math.max(18*scale,width*ratio);
  objects.push({type:spec.id,x:W+68*scale,y:ground,w:width,h:height,hitW:spec.hitW,hitH:spec.hitH,hit:false});
  if(Math.random()<.7){const amount=Math.random()<.25?3:1;
   for(let i=0;i<amount;i++)objects.push({type:'bone',x:W+(amount===1?20:i*34)*scale+68*scale,y:ground-rand(87,140)*scale,w:20*scale,h:18*scale,hit:false})}
 }
 function puff(x,y,color,n=9){for(let i=0;i<n;i++)particles.push({x,y,vx:rand(-170,170)*scale,vy:rand(-240,-60)*scale,life:rand(.3,.65),color,r:rand(3,7)*scale})}
-function gameOver(){stopMusic();mode='over';gameOverDelay=.62;anim('hurt');shake=9;playEffect('hit');if(Math.floor(meters)>best){best=Math.floor(meters);try{localStorage.setItem('shiba-run-best',best)}catch(e){}}bestEl.textContent=String(best).padStart(4,'0');panel.innerHTML=`<div class="eyebrow">THE ADVENTURE ENDS</div><h1>OOPS! 🐕</h1><p>Our brave shiba has met an obstacle.</p><div class="results"><div><small>DISTANCE</small>${Math.floor(meters)} m</div><div><small>BONES</small>${bones} 🦴</div></div><button id="start">TRY AGAIN →</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP TO TRY AGAIN</div>`;bindMenu()}
+function gameOver(){stopMusic();mode='over';gameOverDelay=.62;anim('hurt');shake=9;playEffect('hit');if(Math.floor(meters)>best){best=Math.floor(meters);try{localStorage.setItem('shiba-run-best',best)}catch(e){}}bestEl.textContent=String(best).padStart(4,'0');const world=currentWorld();panel.innerHTML=`<div class="eyebrow">THE ADVENTURE ENDS</div><h1>OOPS! 🐕</h1><p>Our brave shiba has met an obstacle in <strong>${world.name}</strong>.</p><div class="results"><div><small>DISTANCE</small>${Math.floor(meters)} m</div><div><small>BONES</small>${bones} 🦴</div></div><button id="start">TRY AGAIN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE SETTING</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP TO TRY AGAIN</div>`;bindMenu()}
 function update(dt){clock+=dt;dog.animTime+=dt;dog.actionTime+=dt;shake=Math.max(0,shake-dt*15);
 if(mode!=='playing'){
 if(mode==='ready'){anim('idle');dog.y=ground-24*scale+Math.sin(clock*3)*2;}
@@ -288,41 +376,57 @@ function drawSakura(){
   }
   ctx.restore();
 }
-function background(){
-  ctx.fillStyle='#f7d89f';ctx.fillRect(-20,-20,W+40,H+40);
-  // One cycle = 420 m: 0-185 daylight, dusk transition, 225-390 night, dawn transition.
-  const cycle=((meters%420)+420)%420;
-  let night=0;
-  if(cycle<185)night=0;
-  else if(cycle<225)night=(cycle-185)/40;
-  else if(cycle<390)night=1;
-  else night=1-(cycle-390)/30;
-  if(!cityImages['day-far'].complete||!cityImages['day-far'].naturalWidth){
-    const fallback=ctx.createLinearGradient(0,0,0,ground);fallback.addColorStop(0,'#92cdf1');fallback.addColorStop(1,'#dff1f2');ctx.fillStyle=fallback;ctx.fillRect(0,0,W,H);
-  }
-  cityTheme('day',1);
-  cityTheme('night',night);
-  // Play lane is independent of art, keeping hitboxes and jumping physics unchanged.
+const roadPalettes={
+ city:{top:'#9ba3ac',mid:'#b9c0c7',bottom:'#838a93',edge:'#6b7279',line:'#e7edf2',grid:'#a6abb1'},
+ night:{top:'#6e6f83',mid:'#8b8ea2',bottom:'#575a70',edge:'#47495c',line:'#d5bfd0',grid:'#73697a'},
+ warm:{top:'#d2ad9f',mid:'#e3bcae',bottom:'#b99a8a',edge:'#9e867b',line:'#f1d7c7',grid:'#b89286'}
+};
+function drawRoadSurface(kind='city'){
+  const pal=roadPalettes[kind]||roadPalettes.city;
   const road=ctx.createLinearGradient(0,ground,0,H);
-  road.addColorStop(0,night>.5?'#8e7385':'#d3ad9f');
-  road.addColorStop(.2,night>.5?'#a88c9c':'#e3bba8');
-  road.addColorStop(1,night>.5?'#786b83':'#bda291');
+  road.addColorStop(0,pal.top); road.addColorStop(.2,pal.mid); road.addColorStop(1,pal.bottom);
   ctx.fillStyle=road;ctx.fillRect(0,ground,W,H-ground);
-  ctx.fillStyle=night>.5?'#55506a':'#9f8d83';ctx.fillRect(0,ground,W,5*scale);
-  ctx.fillStyle=night>.5?'#d4acb3':'#f1d1bb';ctx.fillRect(0,ground+5*scale,W,3*scale);
+  ctx.fillStyle=pal.edge;ctx.fillRect(0,ground,W,5*scale);
+  ctx.fillStyle=pal.line;ctx.fillRect(0,ground+5*scale,W,3*scale);
   const roadStep=82*scale;
-  ctx.strokeStyle=night>.5?'#715f78':'#b69389';ctx.lineWidth=Math.max(1,1.5*scale);
+  ctx.strokeStyle=pal.grid;ctx.lineWidth=Math.max(1,1.5*scale);
   for(let i=0;i<W/roadStep+3;i++){
     const x=i*roadStep-(worldX*.90%roadStep);
     ctx.beginPath();ctx.moveTo(x,ground+25*scale);ctx.lineTo(x-8*scale,H);ctx.stroke();
   }
-  // Cobbles/shadows close to the screen provide the fast foreground parallax layer.
   const step=56*scale;
   for(let i=0;i<W/step+3;i++){
     const x=i*step-(worldX*1.10%step);
-    rounded(x,ground+45*scale,step-7*scale,3*scale,2*scale,night>.5?'#87748d':'#cba396');
+    rounded(x,ground+45*scale,step-7*scale,3*scale,2*scale,kind==='night'?'#87748d':'#cba396');
   }
-  drawSakura();
+}
+function drawTokyoBackground(){
+  ctx.fillStyle='#f7d89f';ctx.fillRect(-20,-20,W+40,H+40);
+  const cycle=((meters%420)+420)%420;
+  let night=0;
+  if(cycle<185)night=0; else if(cycle<225)night=(cycle-185)/40; else if(cycle<390)night=1; else night=1-(cycle-390)/30;
+  if(!cityImages['day-far'].complete||!cityImages['day-far'].naturalWidth){
+    const fallback=ctx.createLinearGradient(0,0,0,ground);fallback.addColorStop(0,'#92cdf1');fallback.addColorStop(1,'#dff1f2');ctx.fillStyle=fallback;ctx.fillRect(0,0,W,H);
+  }
+  cityTheme('day',1); cityTheme('night',night); drawRoadSurface(night>.5?'night':'warm'); drawSakura();
+}
+function drawCustomWorldBackground(world){
+  ctx.fillStyle='#f7d89f';ctx.fillRect(-20,-20,W+40,H+40);
+  const img=worldBgImages[world.id];
+  if(img&&img.complete&&img.naturalWidth){
+    ctx.save();ctx.beginPath();ctx.rect(0,0,W,ground);ctx.clip();
+    const displayHeight=Math.max(ground-4,320);
+    tiledPanorama(img,.14,0,displayHeight,0,img.naturalHeight);
+    ctx.restore();
+  }else{
+    const fallback=ctx.createLinearGradient(0,0,0,ground);fallback.addColorStop(0,'#92cdf1');fallback.addColorStop(1,'#f7f0dc');ctx.fillStyle=fallback;ctx.fillRect(0,0,W,ground);
+  }
+  drawRoadSurface(world.road||'city');
+}
+function background(){
+  const world=currentWorld();
+  if(world.id==='tokyo') drawTokyoBackground();
+  else drawCustomWorldBackground(world);
 }
 function tree(x,y,kind){ctx.save();ctx.translate(x,y);rounded(-3*scale,0,6*scale,48*scale,3*scale,'#9a8154');ellipse(0,-5*scale,kind===0?31*scale:24*scale,35*scale,'#96ad77');ellipse(-13*scale,2*scale,22*scale,23*scale,'#a7bf83');ellipse(15*scale,0,21*scale,27*scale,'#a4bb80');ctx.restore()}
 function shiba(x,y,t){ctx.save();ctx.translate(x,y);ctx.rotate(dog.rot);ctx.scale(scale,scale);const run=dog.jumps===0?Math.sin(t*17):.2,leg=run*5;
