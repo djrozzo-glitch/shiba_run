@@ -167,6 +167,21 @@ const WORLD_CATALOG=[
     {id:'pretzel',path:'worlds/berlin/pretzel.png',weight:14,w:66,hitW:.82,hitH:.66,level:1},
     {id:'boombox',path:'worlds/berlin/boombox.png',weight:10,w:80,hitW:.82,hitH:.76,level:2}
    ]}
+ ,{id:'amsterdam',name:'Amsterdam',tag:'NL',dayBg:'worlds/amsterdam/day.webp',nightBg:'worlds/amsterdam/night.webp',road:'city',desc:'Canals, tulips, gulls and wonderfully bad decisions',dayObstacles:[
+    {id:'tulip_bike',path:'worlds/amsterdam/tulip_bike.png',weight:12,w:79,hitW:.77,hitH:.66,level:1},
+    {id:'gouda_cheese',path:'worlds/amsterdam/gouda_cheese.png',weight:19,w:69,hitW:.78,hitH:.70,level:0},
+    {id:'wooden_clogs',path:'worlds/amsterdam/wooden_clogs.png',weight:17,w:68,hitW:.80,hitH:.62,level:0},
+    {id:'fallen_friet',path:'worlds/amsterdam/fallen_friet.png',weight:14,w:60,hitW:.70,hitH:.71,level:1},
+    {id:'cheeky_seagull',path:'worlds/amsterdam/cheeky_seagull.png',weight:10,w:65,hitW:.70,hitH:.70,level:2},
+    {id:'suspicious_plant',path:'worlds/amsterdam/suspicious_plant.png',weight:8,w:55,hitW:.62,hitH:.79,level:2}
+  ],nightObstacles:[
+    {id:'cheeky_seagull',path:'worlds/amsterdam/cheeky_seagull.png',weight:18,w:65,hitW:.70,hitH:.70,level:0},
+    {id:'fallen_friet',path:'worlds/amsterdam/fallen_friet.png',weight:18,w:60,hitW:.70,hitH:.71,level:0},
+    {id:'suspicious_plant',path:'worlds/amsterdam/suspicious_plant.png',weight:14,w:55,hitW:.62,hitH:.79,level:1},
+    {id:'wooden_clogs',path:'worlds/amsterdam/wooden_clogs.png',weight:14,w:68,hitW:.80,hitH:.62,level:1},
+    {id:'tulip_bike',path:'worlds/amsterdam/tulip_bike.png',weight:10,w:79,hitW:.77,hitH:.66,level:2},
+    {id:'gouda_cheese',path:'worlds/amsterdam/gouda_cheese.png',weight:12,w:69,hitW:.78,hitH:.70,level:2}
+  ]}
 ];
 const WORLD_MAP=Object.fromEntries(WORLD_CATALOG.map(w=>[w.id,w]));
 const skinImages={};for(const skin of skinCatalog){const im=new Image();im.src=skin.image;skinImages[skin.id]=im;}

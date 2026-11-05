@@ -1,5 +1,3 @@
-Shiba Run v1.7 WORLD TOUR
-Six cities with automatic day/night transitions (420 m cycle).
-Replace your GitHub repository root with this archive contents.
-Original Tokyo, costumes, sounds and progress remain.
-Nighttime Rome/Madrid/Berlin are color-graded versions of illustrated daytime backgrounds.
+Ozzy Amsterdam v1.9 PATCH
+Upload index.html and worlds/amsterdam/ into the ROOT of djrozzo-glitch/shiba_run.
+Keep your existing worlds, audio/bg_music_loop.mp3, assets, skins, etc. untouched.
