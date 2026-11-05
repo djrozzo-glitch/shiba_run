@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
 <meta name="theme-color" content="#8ec9ee" />
-<title>Shiba Run — v1.5.1 · Obstacle Proportions</title>
+<title>Ozzy: The Hunt for Syrniki</title>
 <style>
 :root{color-scheme:light;--ink:#493321;--cream:#fff8e9;--orange:#ec8d41}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:#f7d89f;font-family:ui-rounded,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;-webkit-user-select:none;user-select:none}
@@ -67,13 +67,22 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 #pauseToggle.visible{display:block}
 #pauseToggle:active{transform:translateY(2px)}
 @media(max-width:430px){#pauseToggle{right:8px;top:calc(max(16px,env(safe-area-inset-top)) + 51px);height:42px;min-width:42px;font-size:19px}}
+
+.ozzy-logo{display:block;width:100%;max-width:342px;height:auto;margin:0 auto 5px;object-fit:contain;filter:drop-shadow(0 5px 3px #7e471c20)}
+.logo-fallback{display:none}
+.syrnik-icon{width:1.2em;height:1.2em;object-fit:contain;vertical-align:-.18em;display:inline-block}
+.hud-box .bone{display:inline-flex;align-items:center;gap:3px}
+.shop-balance .syrnik-icon{width:19px;height:19px;vertical-align:-4px}
+#panel .results .syrnik-icon{width:23px;height:23px}
+@media(max-width:430px){.ozzy-logo{max-width:280px}#panel{padding:18px 17px 17px}#panel p{margin:9px 0 14px}#panel .shop-btn{margin-top:7px;padding:9px}}
+@media(max-height:670px){.ozzy-logo{max-width:245px}#panel p{font-size:13px;margin:7px 0}}
 </style>
 </head>
 <body>
-<canvas id="game" aria-label="Shiba Run game"></canvas>
-<div id="hud"><div class="hud-box"><small>DISTANCE</small><span id="score">0000</span> m</div><div class="hud-right"><div class="hud-box"><small>BEST</small><span id="best">0000</span></div><div class="hud-box"><small>BONES</small><span class="bone">🦴 <span id="bones">0</span></span></div><button id="musicToggle" class="audio-toggle" aria-label="Toggle music" aria-pressed="true" title="Music">🎵</button><button id="effectsToggle" class="audio-toggle" aria-label="Toggle sound effects" aria-pressed="true" title="Effects">🔊</button></div></div>
+<canvas id="game" aria-label="Ozzy: The Hunt for Syrniki game"></canvas>
+<div id="hud"><div class="hud-box"><small>DISTANCE</small><span id="score">0000</span> m</div><div class="hud-right"><div class="hud-box"><small>BEST</small><span id="best">0000</span></div><div class="hud-box"><small>SYRNIKI</small><span class="bone"><img src="assets/syrnik.png" class="syrnik-icon" alt=""> <span id="bones">0</span></span></div><button id="musicToggle" class="audio-toggle" aria-label="Toggle music" aria-pressed="true" title="Music">🎵</button><button id="effectsToggle" class="audio-toggle" aria-label="Toggle sound effects" aria-pressed="true" title="Effects">🔊</button></div></div>
 <button id="pauseToggle" aria-label="Pause game" title="Pause game">⏸</button>
-<div id="overlay"><div id="panel"><div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE LOCATION</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div></div></div>
+<div id="overlay"><div id="panel"><div class="eyebrow">ONE-TAP WORLD TOUR</div><img class="ozzy-logo" src="assets/ozzy-logo.webp" alt="Ozzy: The Hunt for Syrniki" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><h1 class="logo-fallback">Ozzy:<br>The Hunt for Syrniki</h1><p>One dog. One delicious mission.<br>Collect syrniki, dodge trouble, run the world!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE LOCATION</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div></div></div>
 <div id="tip">TAP TO JUMP · DOUBLE JUMP!</div>
 <script>
 (() => {
@@ -81,6 +90,7 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 const c=document.getElementById('game'), ctx=c.getContext('2d');
 const $=id=>document.getElementById(id), overlay=$('overlay'), panel=$('panel'), tip=$('tip');
 const scoreEl=$('score'),bestEl=$('best'),bonesEl=$('bones');
+const syrnikSprite=new Image();syrnikSprite.src='assets/syrnik.png';
 let W=400,H=750,DPR=1,ground=580,scale=1,last=0,mode='ready',clock=0,meters=0,bones=0,best=0,musicEnabled=true,effectsEnabled=true,worldX=0,spawnTimer=0,objects=[],particles=[],shake=0;
 try{best=Number(localStorage.getItem('shiba-run-best')||0)}catch(e){}bestEl.textContent=String(best).padStart(4,'0');
 const dog={x:95,y:0,vy:0,jumps:0,rot:0,anim:'idle',animTime:0,actionTime:0,spinTime:0};
@@ -179,7 +189,7 @@ function bindMenu(){
 function showHome(){
  stopMusic();mode='ready';syncPauseButton();overlay.classList.remove('hidden');panel.classList.remove('shop-panel');
  const world=currentWorld();
- panel.innerHTML=`<div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><div class="world-current">CURRENT LOCATION · <strong>${world.name}</strong></div><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE LOCATION</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div>`;
+ panel.innerHTML=`<div class="eyebrow">ONE-TAP WORLD TOUR</div><img class="ozzy-logo" src="assets/ozzy-logo.webp" alt="Ozzy: The Hunt for Syrniki" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><h1 class="logo-fallback">Ozzy:<br>The Hunt for Syrniki</h1><div class="world-current">CURRENT LOCATION · <strong>${world.name}</strong></div><p>One dog. One delicious mission.<br>Collect syrniki, dodge trouble, run the world!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE LOCATION</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div>`;
  bindMenu();
 }
 function showShop(){
@@ -187,10 +197,10 @@ function showShop(){
  const rows=skinCatalog.map(s=>{
   const got=owned.includes(s.id),on=selectedSkin===s.id;
   const disabled=on||(!got&&wallet<s.price);
-  const txt=on?'EQUIPPED':got?'EQUIP':`🦴 ${s.price}`;
-  return `<div class="shop-row"><div class="shop-pic" style="background-image:url('${s.image}')"></div><div class="shop-meta">${s.name}<small>${on?'Currently wearing':got?'Unlocked':s.price+' bones'}</small></div><button class="shop-action" data-skin="${s.id}" ${disabled?'disabled':''}>${txt}</button></div>`;
+  const txt=on?'EQUIPPED':got?'EQUIP':`<img src='assets/syrnik.png' class='syrnik-icon' alt=''> ${s.price}`;
+  return `<div class="shop-row"><div class="shop-pic" style="background-image:url('${s.image}')"></div><div class="shop-meta">${s.name}<small>${on?'Currently wearing':got?'Unlocked':s.price+' syrniki'}</small></div><button class="shop-action" data-skin="${s.id}" ${disabled?'disabled':''}>${txt}</button></div>`;
  }).join('');
- panel.innerHTML=`<div class="eyebrow" style="text-align:center">COSTUME SHOP</div><h1>SHIBA WARDROBE</h1><div class="shop-balance">🦴 YOUR BONES: ${wallet}</div>${rows}<button class="shop-btn" id="backHome">← BACK TO MENU</button><div class="hint" style="text-align:center">Costumes are cosmetic · Saved on this device</div>`;
+ panel.innerHTML=`<div class="eyebrow" style="text-align:center">COSTUME SHOP</div><h1>SHIBA WARDROBE</h1><div class="shop-balance"><img src='assets/syrnik.png' class='syrnik-icon' alt=''> YOUR SYRNIKI: ${wallet}</div>${rows}<button class="shop-btn" id="backHome">← BACK TO MENU</button><div class="hint" style="text-align:center">Costumes are cosmetic · Saved on this device</div>`;
  $('backHome').addEventListener('click',e=>{e.stopPropagation();showHome()});
  panel.querySelectorAll('[data-skin]').forEach(btn=>btn.addEventListener('click',e=>{
    e.stopPropagation();const id=btn.dataset.skin,s=skinCatalog.find(x=>x.id===id);
@@ -404,7 +414,7 @@ function makeObstacle(){
   for(let i=0;i<amount;i++)objects.push({type:'bone',x:W+(amount===1?20:i*34)*scale+68*scale,y:ground-rand(87,140)*scale,w:20*scale,h:18*scale,hit:false})}
 }
 function puff(x,y,color,n=9){for(let i=0;i<n;i++)particles.push({x,y,vx:rand(-170,170)*scale,vy:rand(-240,-60)*scale,life:rand(.3,.65),color,r:rand(3,7)*scale})}
-function gameOver(){stopMusic();mode='over';syncPauseButton();gameOverDelay=.62;anim('hurt');shake=9;playEffect('hit');if(Math.floor(meters)>best){best=Math.floor(meters);try{localStorage.setItem('shiba-run-best',best)}catch(e){}}bestEl.textContent=String(best).padStart(4,'0');const world=currentWorld();panel.innerHTML=`<div class="eyebrow">THE ADVENTURE ENDS</div><h1>OOPS! 🐕</h1><p>Our brave shiba has met an obstacle in <strong>${world.name}</strong>.</p><div class="results"><div><small>DISTANCE</small>${Math.floor(meters)} m</div><div><small>BONES</small>${bones} 🦴</div></div><button id="start">TRY AGAIN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE LOCATION</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP TO TRY AGAIN</div>`;bindMenu()}
+function gameOver(){stopMusic();mode='over';syncPauseButton();gameOverDelay=.62;anim('hurt');shake=9;playEffect('hit');if(Math.floor(meters)>best){best=Math.floor(meters);try{localStorage.setItem('shiba-run-best',best)}catch(e){}}bestEl.textContent=String(best).padStart(4,'0');const world=currentWorld();panel.innerHTML=`<div class="eyebrow">THE ADVENTURE ENDS</div><h1>OOPS! 🐕</h1><p>Our brave shiba has met an obstacle in <strong>${world.name}</strong>.</p><div class="results"><div><small>DISTANCE</small>${Math.floor(meters)} m</div><div><small>SYRNIKI</small>${bones} <img src='assets/syrnik.png' class='syrnik-icon' alt=''></div></div><button id="start">TRY AGAIN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE LOCATION</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP TO TRY AGAIN</div>`;bindMenu()}
 function update(dt){if(mode==='paused')return;clock+=dt;dog.animTime+=dt;dog.actionTime+=dt;shake=Math.max(0,shake-dt*15);
 if(mode!=='playing'){
 if(mode==='ready'){anim('idle');dog.y=ground-24*scale+Math.sin(clock*3)*2;}
@@ -571,7 +581,13 @@ function obstacle(o){
   rounded(o.x-o.w*.45,o.y-o.h,o.w*.9,o.h,6*scale,'#d77f42');
  }
 }
-function boneShape(o){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(Math.sin(clock*7+o.x*.01)*.16);ctx.scale(scale,scale);rounded(-13,-4,26,8,4,'#fff8e8');for(const x of [-12,12])for(const y of [-5,5])ellipse(x,y,5.5,5.5,'#fff8e8');ctx.restore()}
+function boneShape(o){
+ ctx.save();ctx.translate(o.x,o.y);ctx.rotate(Math.sin(clock*6+o.x*.012)*.14);
+ const pulse=1+Math.sin(clock*7+o.x*.009)*.05;ctx.scale(scale*pulse,scale*pulse);
+ if(syrnikSprite.complete&&syrnikSprite.naturalWidth){ctx.drawImage(syrnikSprite,-16,-13,32,26)}
+ else {ellipse(0,0,14,10,'#dc8a35');ellipse(-2,-3,11,5,'#f7bc62')}
+ ctx.restore();
+}
 function draw(){ctx.save();if(shake&&mode!=='paused')ctx.translate(rand(-shake,shake),rand(-shake,shake));background();const shadowSize=dog.jumps?Math.max(.4,1-(ground-dog.y)/200):1;ellipse(dog.x,ground+2*scale,26*scale*shadowSize,5*scale*shadowSize,'#708a5c66');objects.filter(o=>o.type==='bone').forEach(boneShape);objects.filter(o=>o.type!=='bone').forEach(obstacle);drawDog(dog.x,dog.y,clock);for(const p of particles){ctx.globalAlpha=Math.min(1,Math.max(0,p.life*2));ellipse(p.x,p.y,p.r,p.r,p.color)}ctx.globalAlpha=1;ctx.restore()}
 function loop(now){const dt=Math.min(.032,(now-last)/1000||0);last=now;update(dt);draw();requestAnimationFrame(loop)}showHome();
 requestAnimationFrame(loop);
