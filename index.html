@@ -240,8 +240,21 @@ function syncAudioButtons(){const m=$('musicToggle'),s=$('effectsToggle');m.text
 syncAudioButtons();
 // HTMLMediaElement playback is more dependable for iOS Safari, including silent-mode devices.
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-const themeMusic=new Audio('audio/shiba-theme.wav');
-themeMusic.loop=true;themeMusic.preload='auto';themeMusic.volume=.34;
+const themeMusic=new Audio();
+const musicCandidates=['audio/bg_music_loop.mp3','audio/shiba-theme.wav'];
+let musicCandidateIndex=0;
+function loadThemeCandidate(index){
+  musicCandidateIndex=index;
+  themeMusic.src=musicCandidates[index];
+}
+loadThemeCandidate(0);
+themeMusic.addEventListener('error',()=>{
+  if(musicCandidateIndex<musicCandidates.length-1){
+    loadThemeCandidate(musicCandidateIndex+1);
+    themeMusic.load();
+  }
+});
+themeMusic.loop=true;themeMusic.preload='auto';themeMusic.volume=.34;themeMusic.playsInline=true;
 const audioEffects={};
 for(const key of ['jump','double','bone','hit']){
   const el=new Audio('audio/'+key+'.wav'); el.preload='auto';el.volume=.65;
