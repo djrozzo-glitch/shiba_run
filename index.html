@@ -372,23 +372,21 @@ function action(e){if(e&&e.cancelable)e.preventDefault();if(mode==='playing')jum
 c.addEventListener('pointerdown',action);$('start').addEventListener('pointerdown',e=>e.stopPropagation());document.addEventListener('keydown',e=>{if(e.code==='KeyP'||e.code==='Escape'){if(e.repeat)return;togglePause();return}if(['Space','ArrowUp','KeyW'].includes(e.code)){if(e.repeat)return;action(e)}});
 // Eight distinct obstacles; weighted, tiered and individually sized for a mobile play lane.
 const tokyoObstacleCatalog=[
- {id:'cone',path:'obstacles/cone.png',weight:18,w:31,hitW:.65,hitH:.83,level:0},
- {id:'sleeping_cat',path:'obstacles/sleeping_cat.png',weight:13,w:47,hitW:.73,hitH:.72,level:0},
- {id:'angry_cat',path:'obstacles/angry_cat.png',weight:11,w:45,hitW:.68,hitH:.85,level:1},
+ {id:'cone',path:'obstacles/cone.png',weight:18,w:54,hitW:.65,hitH:.83,level:0},
+ {id:'sleeping_cat',path:'obstacles/sleeping_cat.png',weight:13,w:65,hitW:.73,hitH:.72,level:0},
+ {id:'angry_cat',path:'obstacles/angry_cat.png',weight:11,w:62,hitW:.68,hitH:.85,level:1},
  {id:'tanuki',path:'obstacles/tanuki.png',weight:7,w:48,hitW:.68,hitH:.84,level:2},
- {id:'lantern',path:'obstacles/lantern.png',weight:14,w:37,hitW:.74,hitH:.66,level:0},
+ {id:'lantern',path:'obstacles/lantern.png',weight:14,w:65,hitW:.74,hitH:.66,level:0},
  {id:'boxes',path:'obstacles/boxes.png',weight:10,w:45,hitW:.78,hitH:.87,level:1},
  {id:'ramen',path:'obstacles/ramen.png',weight:16,w:44,hitW:.73,hitH:.55,level:0},
  {id:'umbrellas',path:'obstacles/umbrellas.png',weight:11,w:34,hitW:.68,hitH:.83,level:1}
 ];
 // Tight source rectangles keep Tokyo illustrations at their original proportions.
 const obstacleCrops={
- angry_cat:{x:12,y:43,w:232,h:200},
  boxes:{x:12,y:52,w:232,h:191},
  cone:{x:12,y:32,w:232,h:211},
  lantern:{x:12,y:98,w:232,h:145},
  ramen:{x:12,y:84,w:232,h:159},
- sleeping_cat:{x:12,y:62,w:232,h:181},
  tanuki:{x:12,y:75,w:232,h:168},
  umbrellas:{x:62,y:17,w:132,h:226},
 };
