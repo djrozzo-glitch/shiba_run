@@ -1,5 +1,5 @@
-Shiba Run v1.5 - Japan Obstacles & Audio Toggles
-
-Deploy to the root of the shiba_run GitHub Pages repository.
-Replace index.html, upload the new obstacles/ folder, keep skins/, backgrounds/, audio/ and shiba-atlas.png.
-Includes 8 obstacle sprites, individually tuned hitboxes and weighted spawns, separate persisted music / SFX controls.
+Shiba Run v1.7 WORLD TOUR
+Six cities with automatic day/night transitions (420 m cycle).
+Replace your GitHub repository root with this archive contents.
+Original Tokyo, costumes, sounds and progress remain.
+Nighttime Rome/Madrid/Berlin are color-graded versions of illustrated daytime backgrounds.

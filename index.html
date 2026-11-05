@@ -56,12 +56,18 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 .world-pick.alt{background:#fff1d9;color:#86542d;border:2px solid #f5d0a3;border-bottom:4px solid #dbad7e}
 .world-pick:disabled{background:#d7caba;color:#7e715f;border-bottom-color:#c0ad93}
 @media(max-width:430px){.world-grid{gap:8px}.world-card{padding:7px}.world-thumb{height:64px}.world-meta{font-size:11px}.world-pick{font-size:11px;padding:9px 6px}}
+
+.world-thumb-duo{height:75px;border-radius:10px;overflow:hidden;display:flex;border:1px solid #f0e2d0}
+.world-half{flex:1;min-width:0;background-position:center;background-size:cover}
+.world-picker-intro{text-align:center;font-size:12px!important;margin:5px 0 9px!important;color:#946b4b}
+#panel.shop-panel .world-grid{margin:8px 0}
+@media(max-width:430px){.world-thumb-duo{height:62px}#panel.shop-panel{max-height:83dvh}}
 </style>
 </head>
 <body>
 <canvas id="game" aria-label="Shiba Run game"></canvas>
 <div id="hud"><div class="hud-box"><small>DISTANCE</small><span id="score">0000</span> m</div><div class="hud-right"><div class="hud-box"><small>BEST</small><span id="best">0000</span></div><div class="hud-box"><small>BONES</small><span class="bone">🦴 <span id="bones">0</span></span></div><button id="musicToggle" class="audio-toggle" aria-label="Toggle music" aria-pressed="true" title="Music">🎵</button><button id="effectsToggle" class="audio-toggle" aria-label="Toggle sound effects" aria-pressed="true" title="Effects">🔊</button></div></div>
-<div id="overlay"><div id="panel"><div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div></div></div>
+<div id="overlay"><div id="panel"><div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE LOCATION</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div></div></div>
 <div id="tip">TAP TO JUMP · DOUBLE JUMP!</div>
 <script>
 (() => {
@@ -79,49 +85,72 @@ const skinCatalog=[
   {id:'hotdog',name:'Hot Dog Shiba',price:75,image:'skins/hotdog-atlas.png'}
 ];
 const WORLD_CATALOG=[
-  {id:'tokyo',name:'Tokyo Sakura',tag:'Original',preview:'backgrounds/day-street.webp',road:'tokyo',desc:'Day & night sakura streets'},
-  {id:'ny_day',name:'New York · Day',tag:'USA',preview:'worlds/ny_day/bg.png',bg:'worlds/ny_day/bg.png',road:'city',desc:'Brownstones, deli vibes, burgers',obstacles:[
+ {id:'tokyo',name:'Tokyo',tag:'JP',dayBg:'backgrounds/day-street.webp',nightBg:'backgrounds/night-street.webp',road:'warm',desc:'Sakura streets, cats and ramen'},
+ {id:'newyork',name:'New York',tag:'USA',dayBg:'worlds/ny_day/day.webp',nightBg:'worlds/ny_night/night.webp',road:'city',desc:'Burgers by day, rats by night',dayObstacles:[
+
     {id:'burger',path:'worlds/ny_day/burger.png',weight:18,w:42,hitW:.78,hitH:.78,level:0},
     {id:'coffee',path:'worlds/ny_day/coffee.png',weight:15,w:27,hitW:.62,hitH:.82,level:0},
     {id:'hydrant',path:'worlds/ny_day/hydrant.png',weight:14,w:33,hitW:.72,hitH:.82,level:1},
     {id:'pizza_box',path:'worlds/ny_day/pizza_box.png',weight:12,w:45,hitW:.82,hitH:.70,level:1}
-  ]},
-  {id:'ny_night',name:'New York · Night',tag:'USA',preview:'worlds/ny_night/bg.png',bg:'worlds/ny_night/bg.png',road:'night',desc:'Neon skyline, rats, steam, pizza',obstacles:[
+  ],nightObstacles:[
+
     {id:'rat',path:'worlds/ny_night/rat.png',weight:18,w:34,hitW:.72,hitH:.62,level:0},
     {id:'trash_bags',path:'worlds/ny_night/trash_bags.png',weight:14,w:44,hitW:.82,hitH:.77,level:0},
     {id:'manhole',path:'worlds/ny_night/manhole.png',weight:14,w:42,hitW:.80,hitH:.40,level:1},
     {id:'open_pizza_box',path:'worlds/ny_night/open_pizza_box.png',weight:12,w:46,hitW:.84,hitH:.68,level:1}
-  ]},
-  {id:'moscow_day',name:'Moscow · Day',tag:'RU',preview:'worlds/moscow_day/bg.png',bg:'worlds/moscow_day/bg.png',road:'warm',desc:'Red walls, domes, samovar energy',obstacles:[
+   ]},
+ {id:'moscow',name:'Moscow',tag:'RU',dayBg:'worlds/moscow_day/day.webp',nightBg:'worlds/moscow_night/night.webp',road:'warm',desc:'Matryoshkas by day, shawarma by night',dayObstacles:[
+
     {id:'militsiya_helmet',path:'worlds/moscow_day/militsiya_helmet.png',weight:16,w:34,hitW:.72,hitH:.78,level:0},
     {id:'samovar',path:'worlds/moscow_day/samovar.png',weight:14,w:33,hitW:.72,hitH:.82,level:0},
     {id:'matryoshka',path:'worlds/moscow_day/matryoshka.png',weight:16,w:31,hitW:.70,hitH:.86,level:1},
     {id:'bubliki',path:'worlds/moscow_day/bubliki.png',weight:12,w:43,hitW:.84,hitH:.60,level:1}
-  ]},
-  {id:'moscow_night',name:'Moscow · Night',tag:'RU',preview:'worlds/moscow_night/bg.png',bg:'worlds/moscow_night/bg.png',road:'night',desc:'Moonlit embankment chaos',obstacles:[
+  ],nightObstacles:[
+
     {id:'shawarma',path:'worlds/moscow_night/shawarma.png',weight:17,w:44,hitW:.84,hitH:.62,level:0},
     {id:'sleepy_cat',path:'worlds/moscow_night/sleepy_cat.png',weight:15,w:42,hitW:.78,hitH:.58,level:0},
     {id:'bottle_crate',path:'worlds/moscow_night/bottle_crate.png',weight:12,w:38,hitW:.76,hitH:.80,level:1},
     {id:'accordion_case',path:'worlds/moscow_night/accordion_case.png',weight:10,w:47,hitW:.84,hitH:.78,level:2}
-  ]},
-  {id:'rome',name:'Rome',tag:'IT',preview:'worlds/rome/bg.png',bg:'worlds/rome/bg.png',road:'warm',desc:'Cobblestones, gelato and ruins',obstacles:[
+   ]},
+ {id:'rome',name:'Rome',tag:'IT',dayBg:'worlds/rome/day.webp',nightBg:'worlds/rome/night.webp',road:'warm',desc:'Gelato, pizza and ancient ruins',dayObstacles:[
+
     {id:'gelato',path:'worlds/rome/gelato.png',weight:16,w:30,hitW:.62,hitH:.70,level:0},
     {id:'roman_helmet',path:'worlds/rome/roman_helmet.png',weight:15,w:36,hitW:.74,hitH:.80,level:0},
     {id:'pizza_slice',path:'worlds/rome/pizza_slice.png',weight:15,w:41,hitW:.82,hitH:.62,level:1},
     {id:'column_fragment',path:'worlds/rome/column_fragment.png',weight:10,w:49,hitW:.86,hitH:.72,level:2}
-  ]},
-  {id:'madrid',name:'Madrid',tag:'ES',preview:'worlds/madrid/bg.png',bg:'worlds/madrid/bg.png',road:'warm',desc:'Plaza, tapas, churros, football',obstacles:[
+  ],nightObstacles:[
+
+    {id:'gelato',path:'worlds/rome/gelato.png',weight:16,w:30,hitW:.62,hitH:.70,level:0},
+    {id:'roman_helmet',path:'worlds/rome/roman_helmet.png',weight:15,w:36,hitW:.74,hitH:.80,level:0},
+    {id:'pizza_slice',path:'worlds/rome/pizza_slice.png',weight:15,w:41,hitW:.82,hitH:.62,level:1},
+    {id:'column_fragment',path:'worlds/rome/column_fragment.png',weight:10,w:49,hitW:.86,hitH:.72,level:2}
+   ]},
+ {id:'madrid',name:'Madrid',tag:'ES',dayBg:'worlds/madrid/day.webp',nightBg:'worlds/madrid/night.webp',road:'warm',desc:'Tapas, churros and football',dayObstacles:[
+
     {id:'tapas',path:'worlds/madrid/tapas.png',weight:15,w:42,hitW:.82,hitH:.65,level:0},
     {id:'churros',path:'worlds/madrid/churros.png',weight:16,w:34,hitW:.72,hitH:.82,level:0},
     {id:'fan',path:'worlds/madrid/fan.png',weight:13,w:37,hitW:.78,hitH:.74,level:1},
     {id:'soccer_ball',path:'worlds/madrid/soccer_ball.png',weight:12,w:34,hitW:.74,hitH:.74,level:1}
-  ]},
-  {id:'berlin',name:'Berlin',tag:'DE',preview:'worlds/berlin/bg.png',bg:'worlds/berlin/bg.png',road:'city',desc:'Canals, U-Bahn and street food',obstacles:[
+  ],nightObstacles:[
+
+    {id:'tapas',path:'worlds/madrid/tapas.png',weight:15,w:42,hitW:.82,hitH:.65,level:0},
+    {id:'churros',path:'worlds/madrid/churros.png',weight:16,w:34,hitW:.72,hitH:.82,level:0},
+    {id:'fan',path:'worlds/madrid/fan.png',weight:13,w:37,hitW:.78,hitH:.74,level:1},
+    {id:'soccer_ball',path:'worlds/madrid/soccer_ball.png',weight:12,w:34,hitW:.74,hitH:.74,level:1}
+   ]},
+ {id:'berlin',name:'Berlin',tag:'DE',dayBg:'worlds/berlin/day.webp',nightBg:'worlds/berlin/night.webp',road:'city',desc:'Currywurst, pretzels and boomboxes',dayObstacles:[
+
     {id:'currywurst',path:'worlds/berlin/currywurst.png',weight:16,w:42,hitW:.82,hitH:.65,level:0},
     {id:'doner',path:'worlds/berlin/doner.png',weight:15,w:41,hitW:.80,hitH:.78,level:0},
     {id:'pretzel',path:'worlds/berlin/pretzel.png',weight:14,w:40,hitW:.82,hitH:.66,level:1},
     {id:'boombox',path:'worlds/berlin/boombox.png',weight:10,w:46,hitW:.82,hitH:.76,level:2}
-  ]}
+  ],nightObstacles:[
+
+    {id:'currywurst',path:'worlds/berlin/currywurst.png',weight:16,w:42,hitW:.82,hitH:.65,level:0},
+    {id:'doner',path:'worlds/berlin/doner.png',weight:15,w:41,hitW:.80,hitH:.78,level:0},
+    {id:'pretzel',path:'worlds/berlin/pretzel.png',weight:14,w:40,hitW:.82,hitH:.66,level:1},
+    {id:'boombox',path:'worlds/berlin/boombox.png',weight:10,w:46,hitW:.82,hitH:.76,level:2}
+   ]}
 ];
 const WORLD_MAP=Object.fromEntries(WORLD_CATALOG.map(w=>[w.id,w]));
 const skinImages={};for(const skin of skinCatalog){const im=new Image();im.src=skin.image;skinImages[skin.id]=im;}
@@ -131,7 +160,7 @@ try{
   const saved=JSON.parse(localStorage.getItem('shiba-run-owned')||'["classic"]');
   if(Array.isArray(saved))owned=['classic',...saved.filter(v=>skinCatalog.some(s=>s.id===v))];
   const sel=localStorage.getItem('shiba-run-skin');if(owned.includes(sel))selectedSkin=sel;
-  const worldSel=localStorage.getItem('shiba-run-world');if(WORLD_MAP[worldSel])selectedWorld=worldSel;
+  const worldSel=localStorage.getItem('shiba-run-world');const migrated={ny_day:'newyork',ny_night:'newyork',moscow_day:'moscow',moscow_night:'moscow'};if(WORLD_MAP[worldSel])selectedWorld=worldSel;else if(WORLD_MAP[migrated[worldSel]])selectedWorld=migrated[worldSel];
 }catch(e){}
 function currentWorld(){return WORLD_MAP[selectedWorld]||WORLD_CATALOG[0]}
 function saveWardrobe(){try{localStorage.setItem('shiba-run-wallet',String(wallet));localStorage.setItem('shiba-run-owned',JSON.stringify(owned));localStorage.setItem('shiba-run-skin',selectedSkin)}catch(e){}}
@@ -144,7 +173,7 @@ function bindMenu(){
 function showHome(){
  stopMusic();mode='ready';overlay.classList.remove('hidden');panel.classList.remove('shop-panel');
  const world=currentWorld();
- panel.innerHTML=`<div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><div class="world-current">CURRENT SETTING · <strong>${world.name}</strong></div><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openWorlds">🌍 CHOOSE SETTING</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div>`;
+ panel.innerHTML=`<div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><div class="world-current">CURRENT LOCATION · <strong>${world.name}</strong></div><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE LOCATION</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div>`;
  bindMenu();
 }
 function showShop(){
@@ -167,13 +196,13 @@ function showShop(){
 function showWorlds(){
  stopMusic();mode='worlds';overlay.classList.remove('hidden');panel.classList.add('shop-panel');
  const rows=WORLD_CATALOG.map(w=>{
-   const active=w.id===selectedWorld;
-   return `<div class="world-card ${active?'active':''}"><div class="world-thumb" style="background-image:url('${w.preview}')"></div><div class="world-meta">${w.name}<small>${w.desc}</small></div><button class="world-pick ${active?'alt':''}" data-world="${w.id}" ${active?'disabled':''}>${active?'SELECTED':'CHOOSE'}</button></div>`;
+  const active=w.id===selectedWorld;
+  return `<div class="world-card ${active?'active':''}"><div class="world-thumb-duo"><div class="world-half" style="background-image:url('${w.dayBg}')"></div><div class="world-half" style="background-image:url('${w.nightBg}')"></div></div><div class="world-meta">${w.name}<small>☀️ DAY ↔ 🌙 NIGHT</small></div><button class="world-pick ${active?'alt':''}" data-world="${w.id}" ${active?'disabled':''}>${active?'SELECTED':'CHOOSE'}</button></div>`;
  }).join('');
- panel.innerHTML=`<div class="eyebrow" style="text-align:center">LEVEL SELECT</div><h1>CHOOSE<br>SETTING</h1><div class="world-grid">${rows}</div><button class="shop-btn" id="backHome">← BACK TO MENU</button><div class="hint" style="text-align:center">Each setting has its own background and themed obstacles</div>`;
+ panel.innerHTML=`<div class="eyebrow" style="text-align:center">CITY SELECT</div><h1>CHANGE<br>LOCATION</h1><p class="world-picker-intro">Choose a city. Day and night alternate automatically as you run.</p><div class="world-grid">${rows}</div><button class="shop-btn" id="backHome">← BACK TO MENU</button>`;
  $('backHome').addEventListener('click',e=>{e.stopPropagation();showHome()});
  panel.querySelectorAll('[data-world]').forEach(btn=>btn.addEventListener('click',e=>{
-   e.stopPropagation();const id=btn.dataset.world;if(!WORLD_MAP[id])return;selectedWorld=id;saveWorld();showWorlds();
+  e.stopPropagation();const id=btn.dataset.world;if(!WORLD_MAP[id])return;selectedWorld=id;saveWorld();showHome();
  }));
 }
 bindMenu();
@@ -187,8 +216,12 @@ for(const name of ['day-far','day-street','night-far','night-street']){
 }
 const worldBgImages={};
 for(const world of WORLD_CATALOG){
-  if(!world.bg)continue;
-  const img=new Image(); img.decoding='async'; img.src=world.bg; worldBgImages[world.id]=img;
+  if(world.id==='tokyo')continue;
+  worldBgImages[world.id]={};
+  for(const phase of ['day','night']){
+    const img=new Image(); img.decoding='async';img.src=world[phase+'Bg'];
+    worldBgImages[world.id][phase]=img;
+  }
 }
 // Lightweight animated cherry-blossom petals, generated on Canvas (no heavy animation textures).
 const rand=(a,b)=>a+Math.random()*(b-a);
@@ -289,12 +322,24 @@ const obstacleCrops={
  tanuki:{x:12,y:75,w:232,h:168},
  umbrellas:{x:62,y:17,w:132,h:226},
 };
-function activeObstacleCatalog(){const world=currentWorld();return world.obstacles||tokyoObstacleCatalog}
+function daylightAmount(){
+ const cycle=((meters%420)+420)%420;
+ if(cycle<185)return 0;
+ if(cycle<225)return (cycle-185)/40;
+ if(cycle<390)return 1;
+ return 1-(cycle-390)/30;
+}
+function activeObstacleCatalog(){
+ const world=currentWorld();
+ if(world.id==='tokyo')return tokyoObstacleCatalog;
+ return daylightAmount()<.5?world.dayObstacles:world.nightObstacles;
+}
 const obstacleImages={};
 for(const spec of tokyoObstacleCatalog){const image=new Image();image.src=spec.path;obstacleImages[spec.id]=image}
 for(const world of WORLD_CATALOG){
-  if(!world.obstacles)continue;
-  for(const spec of world.obstacles){const image=new Image();image.src=spec.path;obstacleImages[spec.id]=image}
+ for(const spec of [...(world.dayObstacles||[]),...(world.nightObstacles||[])]){
+  const image=new Image();image.src=spec.path;obstacleImages[spec.id]=image;
+ }
 }
 function chooseObstacle(){
  const difficulty=meters<110?0:meters<280?1:2;
@@ -314,7 +359,7 @@ function makeObstacle(){
   for(let i=0;i<amount;i++)objects.push({type:'bone',x:W+(amount===1?20:i*34)*scale+68*scale,y:ground-rand(87,140)*scale,w:20*scale,h:18*scale,hit:false})}
 }
 function puff(x,y,color,n=9){for(let i=0;i<n;i++)particles.push({x,y,vx:rand(-170,170)*scale,vy:rand(-240,-60)*scale,life:rand(.3,.65),color,r:rand(3,7)*scale})}
-function gameOver(){stopMusic();mode='over';gameOverDelay=.62;anim('hurt');shake=9;playEffect('hit');if(Math.floor(meters)>best){best=Math.floor(meters);try{localStorage.setItem('shiba-run-best',best)}catch(e){}}bestEl.textContent=String(best).padStart(4,'0');const world=currentWorld();panel.innerHTML=`<div class="eyebrow">THE ADVENTURE ENDS</div><h1>OOPS! 🐕</h1><p>Our brave shiba has met an obstacle in <strong>${world.name}</strong>.</p><div class="results"><div><small>DISTANCE</small>${Math.floor(meters)} m</div><div><small>BONES</small>${bones} 🦴</div></div><button id="start">TRY AGAIN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE SETTING</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP TO TRY AGAIN</div>`;bindMenu()}
+function gameOver(){stopMusic();mode='over';gameOverDelay=.62;anim('hurt');shake=9;playEffect('hit');if(Math.floor(meters)>best){best=Math.floor(meters);try{localStorage.setItem('shiba-run-best',best)}catch(e){}}bestEl.textContent=String(best).padStart(4,'0');const world=currentWorld();panel.innerHTML=`<div class="eyebrow">THE ADVENTURE ENDS</div><h1>OOPS! 🐕</h1><p>Our brave shiba has met an obstacle in <strong>${world.name}</strong>.</p><div class="results"><div><small>DISTANCE</small>${Math.floor(meters)} m</div><div><small>BONES</small>${bones} 🦴</div></div><button id="start">TRY AGAIN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE LOCATION</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP TO TRY AGAIN</div>`;bindMenu()}
 function update(dt){clock+=dt;dog.animTime+=dt;dog.actionTime+=dt;shake=Math.max(0,shake-dt*15);
 if(mode!=='playing'){
 if(mode==='ready'){anim('idle');dog.y=ground-24*scale+Math.sin(clock*3)*2;}
@@ -402,26 +447,26 @@ function drawRoadSurface(kind='city'){
 }
 function drawTokyoBackground(){
   ctx.fillStyle='#f7d89f';ctx.fillRect(-20,-20,W+40,H+40);
-  const cycle=((meters%420)+420)%420;
-  let night=0;
-  if(cycle<185)night=0; else if(cycle<225)night=(cycle-185)/40; else if(cycle<390)night=1; else night=1-(cycle-390)/30;
+  const night=daylightAmount();
   if(!cityImages['day-far'].complete||!cityImages['day-far'].naturalWidth){
     const fallback=ctx.createLinearGradient(0,0,0,ground);fallback.addColorStop(0,'#92cdf1');fallback.addColorStop(1,'#dff1f2');ctx.fillStyle=fallback;ctx.fillRect(0,0,W,H);
   }
   cityTheme('day',1); cityTheme('night',night); drawRoadSurface(night>.5?'night':'warm'); drawSakura();
 }
 function drawCustomWorldBackground(world){
-  ctx.fillStyle='#f7d89f';ctx.fillRect(-20,-20,W+40,H+40);
-  const img=worldBgImages[world.id];
-  if(img&&img.complete&&img.naturalWidth){
-    ctx.save();ctx.beginPath();ctx.rect(0,0,W,ground);ctx.clip();
-    const displayHeight=Math.max(ground-4,320);
-    tiledPanorama(img,.14,0,displayHeight,0,img.naturalHeight);
-    ctx.restore();
-  }else{
-    const fallback=ctx.createLinearGradient(0,0,0,ground);fallback.addColorStop(0,'#92cdf1');fallback.addColorStop(1,'#f7f0dc');ctx.fillStyle=fallback;ctx.fillRect(0,0,W,ground);
-  }
-  drawRoadSurface(world.road||'city');
+ ctx.fillStyle='#f7d89f';ctx.fillRect(-20,-20,W+40,H+40);
+ const group=worldBgImages[world.id];
+ const alpha=daylightAmount();
+ ctx.save();ctx.beginPath();ctx.rect(0,0,W,ground);ctx.clip();
+ const h=Math.max(ground-4,320);
+ const day=group?.day,night=group?.night;
+ if(day?.complete&&day.naturalWidth){tiledPanorama(day,.14,0,h,0,day.naturalHeight)}
+ else {ctx.fillStyle='#97cdf1';ctx.fillRect(0,0,W,ground)}
+ if(alpha>0 && night?.complete && night.naturalWidth){
+   ctx.save();ctx.globalAlpha=alpha;tiledPanorama(night,.14,0,h,0,night.naturalHeight);ctx.restore();
+ }
+ ctx.restore();
+ drawRoadSurface(alpha>.5?'night':world.road||'city');
 }
 function background(){
   const world=currentWorld();
@@ -483,7 +528,8 @@ function obstacle(o){
 }
 function boneShape(o){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(Math.sin(clock*7+o.x*.01)*.16);ctx.scale(scale,scale);rounded(-13,-4,26,8,4,'#fff8e8');for(const x of [-12,12])for(const y of [-5,5])ellipse(x,y,5.5,5.5,'#fff8e8');ctx.restore()}
 function draw(){ctx.save();if(shake)ctx.translate(rand(-shake,shake),rand(-shake,shake));background();const shadowSize=dog.jumps?Math.max(.4,1-(ground-dog.y)/200):1;ellipse(dog.x,ground+2*scale,26*scale*shadowSize,5*scale*shadowSize,'#708a5c66');objects.filter(o=>o.type==='bone').forEach(boneShape);objects.filter(o=>o.type!=='bone').forEach(obstacle);drawDog(dog.x,dog.y,clock);for(const p of particles){ctx.globalAlpha=Math.min(1,Math.max(0,p.life*2));ellipse(p.x,p.y,p.r,p.r,p.color)}ctx.globalAlpha=1;ctx.restore()}
-function loop(now){const dt=Math.min(.032,(now-last)/1000||0);last=now;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+function loop(now){const dt=Math.min(.032,(now-last)/1000||0);last=now;update(dt);draw();requestAnimationFrame(loop)}showHome();
+requestAnimationFrame(loop);
 })();
 </script>
 </body>
