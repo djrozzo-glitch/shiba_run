@@ -3,6 +3,7 @@
 const c=document.getElementById('game'), ctx=c.getContext('2d');
 const $=id=>document.getElementById(id), overlay=$('overlay'), panel=$('panel'), tip=$('tip');
 const scoreEl=$('score'),bestEl=$('best'),bonesEl=$('bones');
+const syrnikSprite=new Image();syrnikSprite.src='assets/syrnik.png';
 let W=400,H=750,DPR=1,ground=580,scale=1,last=0,mode='ready',clock=0,meters=0,bones=0,best=0,musicEnabled=true,effectsEnabled=true,worldX=0,spawnTimer=0,objects=[],particles=[],shake=0;
 try{best=Number(localStorage.getItem('shiba-run-best')||0)}catch(e){}bestEl.textContent=String(best).padStart(4,'0');
 const dog={x:95,y:0,vy:0,jumps:0,rot:0,anim:'idle',animTime:0,actionTime:0,spinTime:0};
@@ -13,48 +14,86 @@ const skinCatalog=[
   {id:'hotdog',name:'Hot Dog Shiba',price:75,image:'skins/hotdog-atlas.png'}
 ];
 const WORLD_CATALOG=[
-  {id:'tokyo',name:'Tokyo Sakura',tag:'Original',preview:'backgrounds/day-street.webp',road:'tokyo',desc:'Day & night sakura streets'},
-  {id:'ny_day',name:'New York · Day',tag:'USA',preview:'worlds/ny_day/bg.png',bg:'worlds/ny_day/bg.png',road:'city',desc:'Brownstones, deli vibes, burgers',obstacles:[
-    {id:'burger',path:'worlds/ny_day/burger.png',weight:18,w:42,hitW:.78,hitH:.78,level:0},
-    {id:'coffee',path:'worlds/ny_day/coffee.png',weight:15,w:27,hitW:.62,hitH:.82,level:0},
-    {id:'hydrant',path:'worlds/ny_day/hydrant.png',weight:14,w:33,hitW:.72,hitH:.82,level:1},
-    {id:'pizza_box',path:'worlds/ny_day/pizza_box.png',weight:12,w:45,hitW:.82,hitH:.70,level:1}
-  ]},
-  {id:'ny_night',name:'New York · Night',tag:'USA',preview:'worlds/ny_night/bg.png',bg:'worlds/ny_night/bg.png',road:'night',desc:'Neon skyline, rats, steam, pizza',obstacles:[
-    {id:'rat',path:'worlds/ny_night/rat.png',weight:18,w:34,hitW:.72,hitH:.62,level:0},
-    {id:'trash_bags',path:'worlds/ny_night/trash_bags.png',weight:14,w:44,hitW:.82,hitH:.77,level:0},
-    {id:'manhole',path:'worlds/ny_night/manhole.png',weight:14,w:42,hitW:.80,hitH:.40,level:1},
-    {id:'open_pizza_box',path:'worlds/ny_night/open_pizza_box.png',weight:12,w:46,hitW:.84,hitH:.68,level:1}
-  ]},
-  {id:'moscow_day',name:'Moscow · Day',tag:'RU',preview:'worlds/moscow_day/bg.png',bg:'worlds/moscow_day/bg.png',road:'warm',desc:'Red walls, domes, samovar energy',obstacles:[
-    {id:'militsiya_helmet',path:'worlds/moscow_day/militsiya_helmet.png',weight:16,w:34,hitW:.72,hitH:.78,level:0},
-    {id:'samovar',path:'worlds/moscow_day/samovar.png',weight:14,w:33,hitW:.72,hitH:.82,level:0},
-    {id:'matryoshka',path:'worlds/moscow_day/matryoshka.png',weight:16,w:31,hitW:.70,hitH:.86,level:1},
-    {id:'bubliki',path:'worlds/moscow_day/bubliki.png',weight:12,w:43,hitW:.84,hitH:.60,level:1}
-  ]},
-  {id:'moscow_night',name:'Moscow · Night',tag:'RU',preview:'worlds/moscow_night/bg.png',bg:'worlds/moscow_night/bg.png',road:'night',desc:'Moonlit embankment chaos',obstacles:[
-    {id:'shawarma',path:'worlds/moscow_night/shawarma.png',weight:17,w:44,hitW:.84,hitH:.62,level:0},
-    {id:'sleepy_cat',path:'worlds/moscow_night/sleepy_cat.png',weight:15,w:42,hitW:.78,hitH:.58,level:0},
-    {id:'bottle_crate',path:'worlds/moscow_night/bottle_crate.png',weight:12,w:38,hitW:.76,hitH:.80,level:1},
-    {id:'accordion_case',path:'worlds/moscow_night/accordion_case.png',weight:10,w:47,hitW:.84,hitH:.78,level:2}
-  ]},
-  {id:'rome',name:'Rome',tag:'IT',preview:'worlds/rome/bg.png',bg:'worlds/rome/bg.png',road:'warm',desc:'Cobblestones, gelato and ruins',obstacles:[
-    {id:'gelato',path:'worlds/rome/gelato.png',weight:16,w:30,hitW:.62,hitH:.70,level:0},
-    {id:'roman_helmet',path:'worlds/rome/roman_helmet.png',weight:15,w:36,hitW:.74,hitH:.80,level:0},
-    {id:'pizza_slice',path:'worlds/rome/pizza_slice.png',weight:15,w:41,hitW:.82,hitH:.62,level:1},
-    {id:'column_fragment',path:'worlds/rome/column_fragment.png',weight:10,w:49,hitW:.86,hitH:.72,level:2}
-  ]},
-  {id:'madrid',name:'Madrid',tag:'ES',preview:'worlds/madrid/bg.png',bg:'worlds/madrid/bg.png',road:'warm',desc:'Plaza, tapas, churros, football',obstacles:[
-    {id:'tapas',path:'worlds/madrid/tapas.png',weight:15,w:42,hitW:.82,hitH:.65,level:0},
-    {id:'churros',path:'worlds/madrid/churros.png',weight:16,w:34,hitW:.72,hitH:.82,level:0},
-    {id:'fan',path:'worlds/madrid/fan.png',weight:13,w:37,hitW:.78,hitH:.74,level:1},
-    {id:'soccer_ball',path:'worlds/madrid/soccer_ball.png',weight:12,w:34,hitW:.74,hitH:.74,level:1}
-  ]},
-  {id:'berlin',name:'Berlin',tag:'DE',preview:'worlds/berlin/bg.png',bg:'worlds/berlin/bg.png',road:'city',desc:'Canals, U-Bahn and street food',obstacles:[
-    {id:'currywurst',path:'worlds/berlin/currywurst.png',weight:16,w:42,hitW:.82,hitH:.65,level:0},
-    {id:'doner',path:'worlds/berlin/doner.png',weight:15,w:41,hitW:.80,hitH:.78,level:0},
-    {id:'pretzel',path:'worlds/berlin/pretzel.png',weight:14,w:40,hitW:.82,hitH:.66,level:1},
-    {id:'boombox',path:'worlds/berlin/boombox.png',weight:10,w:46,hitW:.82,hitH:.76,level:2}
+ {id:'tokyo',name:'Tokyo',tag:'JP',dayBg:'backgrounds/day-street.webp',nightBg:'backgrounds/night-street.webp',road:'warm',desc:'Sakura streets, cats and ramen'},
+ {id:'newyork',name:'New York',tag:'USA',dayBg:'worlds/ny_day/day.webp',nightBg:'worlds/ny_night/night.webp',road:'city',desc:'Burgers by day, rats by night',dayObstacles:[
+
+    {id:'burger',path:'worlds/ny_day/burger.png',weight:18,w:68,hitW:.78,hitH:.78,level:0},
+    {id:'coffee',path:'worlds/ny_day/coffee.png',weight:15,w:54,hitW:.62,hitH:.82,level:0},
+    {id:'hydrant',path:'worlds/ny_day/hydrant.png',weight:14,w:60,hitW:.72,hitH:.82,level:1},
+    {id:'pizza_box',path:'worlds/ny_day/pizza_box.png',weight:12,w:72,hitW:.82,hitH:.70,level:1}
+  ],nightObstacles:[
+
+    {id:'rat',path:'worlds/ny_night/rat.png',weight:18,w:58,hitW:.72,hitH:.62,level:0},
+    {id:'trash_bags',path:'worlds/ny_night/trash_bags.png',weight:14,w:70,hitW:.82,hitH:.77,level:0},
+    {id:'manhole',path:'worlds/ny_night/manhole.png',weight:14,w:72,hitW:.80,hitH:.40,level:1},
+    {id:'open_pizza_box',path:'worlds/ny_night/open_pizza_box.png',weight:12,w:76,hitW:.84,hitH:.68,level:1}
+   ]},
+ {id:'moscow',name:'Moscow',tag:'RU',dayBg:'worlds/moscow_day/day.webp',nightBg:'worlds/moscow_night/night.webp',road:'warm',desc:'Matryoshkas by day, shawarma by night',dayObstacles:[
+
+    {id:'militsiya_helmet',path:'worlds/moscow_day/militsiya_helmet.png',weight:16,w:60,hitW:.72,hitH:.78,level:0},
+    {id:'samovar',path:'worlds/moscow_day/samovar.png',weight:14,w:60,hitW:.72,hitH:.82,level:0},
+    {id:'matryoshka',path:'worlds/moscow_day/matryoshka.png',weight:16,w:58,hitW:.70,hitH:.86,level:1},
+    {id:'bubliki',path:'worlds/moscow_day/bubliki.png',weight:12,w:70,hitW:.84,hitH:.60,level:1}
+  ],nightObstacles:[
+
+    {id:'shawarma',path:'worlds/moscow_night/shawarma.png',weight:17,w:70,hitW:.84,hitH:.62,level:0},
+    {id:'sleepy_cat',path:'worlds/moscow_night/sleepy_cat.png',weight:15,w:68,hitW:.78,hitH:.58,level:0},
+    {id:'bottle_crate',path:'worlds/moscow_night/bottle_crate.png',weight:12,w:66,hitW:.76,hitH:.80,level:1},
+    {id:'accordion_case',path:'worlds/moscow_night/accordion_case.png',weight:10,w:78,hitW:.84,hitH:.78,level:2}
+   ]},
+ {id:'rome',name:'Rome',tag:'IT',dayBg:'worlds/rome/day.webp',nightBg:'worlds/rome/night.webp',road:'warm',desc:'Gelato, pizza and ancient ruins',dayObstacles:[
+
+    {id:'gelato',path:'worlds/rome/gelato.png',weight:16,w:56,hitW:.62,hitH:.70,level:0},
+    {id:'roman_helmet',path:'worlds/rome/roman_helmet.png',weight:15,w:62,hitW:.74,hitH:.80,level:0},
+    {id:'pizza_slice',path:'worlds/rome/pizza_slice.png',weight:15,w:66,hitW:.82,hitH:.62,level:1},
+    {id:'column_fragment',path:'worlds/rome/column_fragment.png',weight:10,w:84,hitW:.86,hitH:.72,level:2}
+  ],nightObstacles:[
+
+    {id:'gelato',path:'worlds/rome/gelato.png',weight:16,w:56,hitW:.62,hitH:.70,level:0},
+    {id:'roman_helmet',path:'worlds/rome/roman_helmet.png',weight:15,w:62,hitW:.74,hitH:.80,level:0},
+    {id:'pizza_slice',path:'worlds/rome/pizza_slice.png',weight:15,w:66,hitW:.82,hitH:.62,level:1},
+    {id:'column_fragment',path:'worlds/rome/column_fragment.png',weight:10,w:84,hitW:.86,hitH:.72,level:2}
+   ]},
+ {id:'madrid',name:'Madrid',tag:'ES',dayBg:'worlds/madrid/day.webp',nightBg:'worlds/madrid/night.webp',road:'warm',desc:'Tapas, churros and football',dayObstacles:[
+
+    {id:'tapas',path:'worlds/madrid/tapas.png',weight:15,w:68,hitW:.82,hitH:.65,level:0},
+    {id:'churros',path:'worlds/madrid/churros.png',weight:16,w:60,hitW:.72,hitH:.82,level:0},
+    {id:'fan',path:'worlds/madrid/fan.png',weight:13,w:62,hitW:.78,hitH:.74,level:1},
+    {id:'soccer_ball',path:'worlds/madrid/soccer_ball.png',weight:12,w:56,hitW:.74,hitH:.74,level:1}
+  ],nightObstacles:[
+
+    {id:'tapas',path:'worlds/madrid/tapas.png',weight:15,w:68,hitW:.82,hitH:.65,level:0},
+    {id:'churros',path:'worlds/madrid/churros.png',weight:16,w:60,hitW:.72,hitH:.82,level:0},
+    {id:'fan',path:'worlds/madrid/fan.png',weight:13,w:62,hitW:.78,hitH:.74,level:1},
+    {id:'soccer_ball',path:'worlds/madrid/soccer_ball.png',weight:12,w:56,hitW:.74,hitH:.74,level:1}
+   ]},
+ {id:'berlin',name:'Berlin',tag:'DE',dayBg:'worlds/berlin/day.webp',nightBg:'worlds/berlin/night.webp',road:'city',desc:'Currywurst, pretzels and boomboxes',dayObstacles:[
+
+    {id:'currywurst',path:'worlds/berlin/currywurst.png',weight:16,w:72,hitW:.82,hitH:.65,level:0},
+    {id:'doner',path:'worlds/berlin/doner.png',weight:15,w:72,hitW:.80,hitH:.78,level:0},
+    {id:'pretzel',path:'worlds/berlin/pretzel.png',weight:14,w:66,hitW:.82,hitH:.66,level:1},
+    {id:'boombox',path:'worlds/berlin/boombox.png',weight:10,w:80,hitW:.82,hitH:.76,level:2}
+  ],nightObstacles:[
+
+    {id:'currywurst',path:'worlds/berlin/currywurst.png',weight:16,w:72,hitW:.82,hitH:.65,level:0},
+    {id:'doner',path:'worlds/berlin/doner.png',weight:15,w:72,hitW:.80,hitH:.78,level:0},
+    {id:'pretzel',path:'worlds/berlin/pretzel.png',weight:14,w:66,hitW:.82,hitH:.66,level:1},
+    {id:'boombox',path:'worlds/berlin/boombox.png',weight:10,w:80,hitW:.82,hitH:.76,level:2}
+   ]}
+ ,{id:'amsterdam',name:'Amsterdam',tag:'NL',dayBg:'worlds/amsterdam/day.webp',nightBg:'worlds/amsterdam/night.webp',road:'city',desc:'Canals, tulips, gulls and wonderfully bad decisions',dayObstacles:[
+    {id:'tulip_bike',path:'worlds/amsterdam/tulip_bike.png',weight:12,w:79,hitW:.77,hitH:.66,level:1},
+    {id:'gouda_cheese',path:'worlds/amsterdam/gouda_cheese.png',weight:19,w:69,hitW:.78,hitH:.70,level:0},
+    {id:'wooden_clogs',path:'worlds/amsterdam/wooden_clogs.png',weight:17,w:68,hitW:.80,hitH:.62,level:0},
+    {id:'fallen_friet',path:'worlds/amsterdam/fallen_friet.png',weight:14,w:60,hitW:.70,hitH:.71,level:1},
+    {id:'cheeky_seagull',path:'worlds/amsterdam/cheeky_seagull.png',weight:10,w:65,hitW:.70,hitH:.70,level:2},
+    {id:'suspicious_plant',path:'worlds/amsterdam/suspicious_plant.png',weight:8,w:55,hitW:.62,hitH:.79,level:2}
+  ],nightObstacles:[
+    {id:'cheeky_seagull',path:'worlds/amsterdam/cheeky_seagull.png',weight:18,w:65,hitW:.70,hitH:.70,level:0},
+    {id:'fallen_friet',path:'worlds/amsterdam/fallen_friet.png',weight:18,w:60,hitW:.70,hitH:.71,level:0},
+    {id:'suspicious_plant',path:'worlds/amsterdam/suspicious_plant.png',weight:14,w:55,hitW:.62,hitH:.79,level:1},
+    {id:'wooden_clogs',path:'worlds/amsterdam/wooden_clogs.png',weight:14,w:68,hitW:.80,hitH:.62,level:1},
+    {id:'tulip_bike',path:'worlds/amsterdam/tulip_bike.png',weight:10,w:79,hitW:.77,hitH:.66,level:2},
+    {id:'gouda_cheese',path:'worlds/amsterdam/gouda_cheese.png',weight:12,w:69,hitW:.78,hitH:.70,level:2}
   ]}
 ];
 const WORLD_MAP=Object.fromEntries(WORLD_CATALOG.map(w=>[w.id,w]));
@@ -65,7 +104,7 @@ try{
   const saved=JSON.parse(localStorage.getItem('shiba-run-owned')||'["classic"]');
   if(Array.isArray(saved))owned=['classic',...saved.filter(v=>skinCatalog.some(s=>s.id===v))];
   const sel=localStorage.getItem('shiba-run-skin');if(owned.includes(sel))selectedSkin=sel;
-  const worldSel=localStorage.getItem('shiba-run-world');if(WORLD_MAP[worldSel])selectedWorld=worldSel;
+  const worldSel=localStorage.getItem('shiba-run-world');const migrated={ny_day:'newyork',ny_night:'newyork',moscow_day:'moscow',moscow_night:'moscow'};if(WORLD_MAP[worldSel])selectedWorld=worldSel;else if(WORLD_MAP[migrated[worldSel]])selectedWorld=migrated[worldSel];
 }catch(e){}
 function currentWorld(){return WORLD_MAP[selectedWorld]||WORLD_CATALOG[0]}
 function saveWardrobe(){try{localStorage.setItem('shiba-run-wallet',String(wallet));localStorage.setItem('shiba-run-owned',JSON.stringify(owned));localStorage.setItem('shiba-run-skin',selectedSkin)}catch(e){}}
@@ -76,20 +115,20 @@ function bindMenu(){
   const start=$('start');if(start)start.addEventListener('click',e=>{e.stopPropagation();reset()});
 }
 function showHome(){
- stopMusic();mode='ready';overlay.classList.remove('hidden');panel.classList.remove('shop-panel');
+ stopMusic();mode='ready';syncPauseButton();overlay.classList.remove('hidden');panel.classList.remove('shop-panel');
  const world=currentWorld();
- panel.innerHTML=`<div class="eyebrow">ONE-TAP ARCADE</div><h1>SHIBA<br>RUN!</h1><div class="world-current">CURRENT SETTING · <strong>${world.name}</strong></div><p>Good dog. Bad decisions.<br>Jump over obstacles, collect bones, run forever!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openWorlds">🌍 CHOOSE SETTING</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div>`;
+ panel.innerHTML=`<div class="eyebrow">ONE-TAP WORLD TOUR</div><img class="ozzy-logo" src="assets/ozzy-logo.webp" alt="Ozzy: The Hunt for Syrniki" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><h1 class="logo-fallback">Ozzy:<br>The Hunt for Syrniki</h1><div class="world-current">CURRENT LOCATION · <strong>${world.name}</strong></div><p>One dog. One delicious mission.<br>Collect syrniki, dodge trouble, run the world!</p><button id="start">LET'S RUN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE LOCATION</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP ANYWHERE · SPACE · ↑</div>`;
  bindMenu();
 }
 function showShop(){
- stopMusic();mode='shop';overlay.classList.remove('hidden');panel.classList.add('shop-panel');
+ stopMusic();mode='shop';syncPauseButton();overlay.classList.remove('hidden');panel.classList.add('shop-panel');
  const rows=skinCatalog.map(s=>{
   const got=owned.includes(s.id),on=selectedSkin===s.id;
   const disabled=on||(!got&&wallet<s.price);
-  const txt=on?'EQUIPPED':got?'EQUIP':`🦴 ${s.price}`;
-  return `<div class="shop-row"><div class="shop-pic" style="background-image:url('${s.image}')"></div><div class="shop-meta">${s.name}<small>${on?'Currently wearing':got?'Unlocked':s.price+' bones'}</small></div><button class="shop-action" data-skin="${s.id}" ${disabled?'disabled':''}>${txt}</button></div>`;
+  const txt=on?'EQUIPPED':got?'EQUIP':`<img src='assets/syrnik.png' class='syrnik-icon' alt=''> ${s.price}`;
+  return `<div class="shop-row"><div class="shop-pic" style="background-image:url('${s.image}')"></div><div class="shop-meta">${s.name}<small>${on?'Currently wearing':got?'Unlocked':s.price+' syrniki'}</small></div><button class="shop-action" data-skin="${s.id}" ${disabled?'disabled':''}>${txt}</button></div>`;
  }).join('');
- panel.innerHTML=`<div class="eyebrow" style="text-align:center">COSTUME SHOP</div><h1>SHIBA WARDROBE</h1><div class="shop-balance">🦴 YOUR BONES: ${wallet}</div>${rows}<button class="shop-btn" id="backHome">← BACK TO MENU</button><div class="hint" style="text-align:center">Costumes are cosmetic · Saved on this device</div>`;
+ panel.innerHTML=`<div class="eyebrow" style="text-align:center">COSTUME SHOP</div><h1>SHIBA WARDROBE</h1><div class="shop-balance"><img src='assets/syrnik.png' class='syrnik-icon' alt=''> YOUR SYRNIKI: ${wallet}</div>${rows}<button class="shop-btn" id="backHome">← BACK TO MENU</button><div class="hint" style="text-align:center">Costumes are cosmetic · Saved on this device</div>`;
  $('backHome').addEventListener('click',e=>{e.stopPropagation();showHome()});
  panel.querySelectorAll('[data-skin]').forEach(btn=>btn.addEventListener('click',e=>{
    e.stopPropagation();const id=btn.dataset.skin,s=skinCatalog.find(x=>x.id===id);
@@ -99,15 +138,15 @@ function showShop(){
  }));
 }
 function showWorlds(){
- stopMusic();mode='worlds';overlay.classList.remove('hidden');panel.classList.add('shop-panel');
+ stopMusic();mode='worlds';syncPauseButton();overlay.classList.remove('hidden');panel.classList.add('shop-panel');
  const rows=WORLD_CATALOG.map(w=>{
-   const active=w.id===selectedWorld;
-   return `<div class="world-card ${active?'active':''}"><div class="world-thumb" style="background-image:url('${w.preview}')"></div><div class="world-meta">${w.name}<small>${w.desc}</small></div><button class="world-pick ${active?'alt':''}" data-world="${w.id}" ${active?'disabled':''}>${active?'SELECTED':'CHOOSE'}</button></div>`;
+  const active=w.id===selectedWorld;
+  return `<div class="world-card ${active?'active':''}"><div class="world-thumb-duo"><div class="world-half" style="background-image:url('${w.dayBg}')"></div><div class="world-half" style="background-image:url('${w.nightBg}')"></div></div><div class="world-meta">${w.name}<small>☀️ DAY ↔ 🌙 NIGHT</small></div><button class="world-pick ${active?'alt':''}" data-world="${w.id}" ${active?'disabled':''}>${active?'SELECTED':'CHOOSE'}</button></div>`;
  }).join('');
- panel.innerHTML=`<div class="eyebrow" style="text-align:center">LEVEL SELECT</div><h1>CHOOSE<br>SETTING</h1><div class="world-grid">${rows}</div><button class="shop-btn" id="backHome">← BACK TO MENU</button><div class="hint" style="text-align:center">Each setting has its own background and themed obstacles</div>`;
+ panel.innerHTML=`<div class="eyebrow" style="text-align:center">CITY SELECT</div><h1>CHANGE<br>LOCATION</h1><p class="world-picker-intro">Choose a city. Day and night alternate automatically as you run.</p><div class="world-grid">${rows}</div><button class="shop-btn" id="backHome">← BACK TO MENU</button>`;
  $('backHome').addEventListener('click',e=>{e.stopPropagation();showHome()});
  panel.querySelectorAll('[data-world]').forEach(btn=>btn.addEventListener('click',e=>{
-   e.stopPropagation();const id=btn.dataset.world;if(!WORLD_MAP[id])return;selectedWorld=id;saveWorld();showWorlds();
+  e.stopPropagation();const id=btn.dataset.world;if(!WORLD_MAP[id])return;selectedWorld=id;saveWorld();showHome();
  }));
 }
 bindMenu();
@@ -121,8 +160,12 @@ for(const name of ['day-far','day-street','night-far','night-street']){
 }
 const worldBgImages={};
 for(const world of WORLD_CATALOG){
-  if(!world.bg)continue;
-  const img=new Image(); img.decoding='async'; img.src=world.bg; worldBgImages[world.id]=img;
+  if(world.id==='tokyo')continue;
+  worldBgImages[world.id]={};
+  for(const phase of ['day','night']){
+    const img=new Image(); img.decoding='async';img.src=world[phase+'Bg'];
+    worldBgImages[world.id][phase]=img;
+  }
 }
 // Lightweight animated cherry-blossom petals, generated on Canvas (no heavy animation textures).
 const rand=(a,b)=>a+Math.random()*(b-a);
@@ -141,8 +184,21 @@ function syncAudioButtons(){const m=$('musicToggle'),s=$('effectsToggle');m.text
 syncAudioButtons();
 // HTMLMediaElement playback is more dependable for iOS Safari, including silent-mode devices.
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-const themeMusic=new Audio('audio/shiba-theme.wav');
-themeMusic.loop=true;themeMusic.preload='auto';themeMusic.volume=.34;
+const themeMusic=new Audio();
+const musicCandidates=['audio/bg_music_loop.mp3','audio/shiba-theme.wav'];
+let musicCandidateIndex=0;
+function loadThemeCandidate(index){
+  musicCandidateIndex=index;
+  themeMusic.src=musicCandidates[index];
+}
+loadThemeCandidate(0);
+themeMusic.addEventListener('error',()=>{
+  if(musicCandidateIndex<musicCandidates.length-1){
+    loadThemeCandidate(musicCandidateIndex+1);
+    themeMusic.load();
+  }
+});
+themeMusic.loop=true;themeMusic.preload='auto';themeMusic.volume=.34;themeMusic.playsInline=true;
 const audioEffects={};
 for(const key of ['jump','double','bone','hit']){
   const el=new Audio('audio/'+key+'.wav'); el.preload='auto';el.volume=.65;
@@ -161,14 +217,35 @@ function playEffect(key){
   }
 }
 function startMusic(){
-  if(!musicEnabled||mode!=='playing')return;
+  if(!musicEnabled||mode!=='playing'){
+    themeMusic.muted=true;
+    themeMusic.pause();
+    return;
+  }
   themeMusic.muted=false;
   const p=themeMusic.play();if(p&&p.catch)p.catch(()=>{});
 }
-function stopMusic(){themeMusic.pause();}
-document.addEventListener('visibilitychange',()=>{
-  if(document.hidden)stopMusic();else if(mode==='playing'&&musicEnabled)startMusic();
+function stopMusic(){
+  themeMusic.pause();
+  themeMusic.muted=true;
+}
+themeMusic.addEventListener('play',()=>{
+  if(!musicEnabled||mode!=='playing'){
+    themeMusic.pause();
+    themeMusic.muted=true;
+  }
 });
+themeMusic.addEventListener('playing',()=>{
+  if(!musicEnabled||mode!=='playing'){
+    themeMusic.pause();
+    themeMusic.muted=true;
+  }
+});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)stopMusic();else startMusic();
+});
+window.addEventListener('pagehide',stopMusic,{passive:true});
+window.addEventListener('blur',()=>{if(mode!=='playing'||!musicEnabled)stopMusic();},{passive:true});
 // iOS Safari requires starting/resuming Web Audio from a real user gesture.
 function unlockAudio(){
   try{
@@ -197,38 +274,74 @@ document.addEventListener('pointerdown',unlockAudio,{passive:true});
 document.addEventListener('touchstart',unlockAudio,{passive:true});
 $('musicToggle').onclick=e=>{e.stopPropagation();musicEnabled=!musicEnabled;try{localStorage.setItem('shiba-run-music',musicEnabled?'on':'off')}catch(_){ }syncAudioButtons();if(musicEnabled){unlockAudio();startMusic()}else stopMusic()};
 $('effectsToggle').onclick=e=>{e.stopPropagation();effectsEnabled=!effectsEnabled;try{localStorage.setItem('shiba-run-effects',effectsEnabled?'on':'off')}catch(_){ }syncAudioButtons();if(effectsEnabled){unlockAudio();playEffect('bone')}};
-function reset(){mode='playing';startMusic();clock=0;meters=0;bones=0;worldX=0;spawnTimer=1.1;objects=[];particles=[];shake=0;dog.y=ground-24*scale;dog.vy=0;dog.jumps=0;dog.rot=0;dog.anim='run_1';dog.animTime=0;dog.actionTime=0;dog.spinTime=0;gameOverDelay=0;scoreEl.textContent='0000';bonesEl.textContent='0';overlay.classList.add('hidden');tip.style.opacity='1'}
+let savedDogOnPause=null;
+function syncPauseButton(){
+  const b=$('pauseToggle');
+  const active=mode==='playing'||mode==='paused';
+  b.classList.toggle('visible',active);
+  const paused=mode==='paused';
+  b.textContent=paused?'▶':'⏸';
+  b.setAttribute('aria-label',paused?'Resume game':'Pause game');
+  b.title=paused?'Resume game':'Pause game';
+}
+function togglePause(){
+  if(mode==='playing'){
+    savedDogOnPause={...dog};
+    mode='paused';stopMusic();
+    dog.y=ground-24*scale;dog.vy=0;dog.jumps=0;dog.rot=0;
+    dog.anim='idle';dog.animTime=0;dog.actionTime=0;
+    tip.style.opacity='0';
+  }else if(mode==='paused'){
+    if(savedDogOnPause)Object.assign(dog,savedDogOnPause);
+    savedDogOnPause=null;
+    mode='playing';startMusic();
+  }else return;
+  syncPauseButton();
+}
+$('pauseToggle').addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault()});
+$('pauseToggle').addEventListener('click',e=>{e.stopPropagation();togglePause()});
+function reset(){savedDogOnPause=null;mode='playing';syncPauseButton();startMusic();clock=0;meters=0;bones=0;worldX=0;spawnTimer=1.1;objects=[];particles=[];shake=0;dog.y=ground-24*scale;dog.vy=0;dog.jumps=0;dog.rot=0;dog.anim='run_1';dog.animTime=0;dog.actionTime=0;dog.spinTime=0;gameOverDelay=0;scoreEl.textContent='0000';bonesEl.textContent='0';overlay.classList.add('hidden');tip.style.opacity='1'}
 function jump(){if(dog.jumps>=2)return;dog.vy=-(dog.jumps===0?595:525)*scale;dog.jumps++;dog.actionTime=0;dog.spinTime=0;anim(dog.jumps===1?'jump_launch':'double_jump');playEffect(dog.jumps===1?'jump':'double');for(let i=0;i<7;i++)particles.push({x:dog.x-20*scale,y:ground-6*scale,vx:rand(-70,30)*scale,vy:rand(-100,-10)*scale,life:.35,color:'#e7c38f',r:rand(2,5)*scale});}
 function action(e){if(e&&e.cancelable)e.preventDefault();if(mode==='playing')jump();else if(mode==='ready'||mode==='over')reset()}
-c.addEventListener('pointerdown',action);$('start').addEventListener('pointerdown',e=>e.stopPropagation());document.addEventListener('keydown',e=>{if(['Space','ArrowUp','KeyW'].includes(e.code)){if(e.repeat)return;action(e)}});
+c.addEventListener('pointerdown',action);$('start').addEventListener('pointerdown',e=>e.stopPropagation());document.addEventListener('keydown',e=>{if(e.code==='KeyP'||e.code==='Escape'){if(e.repeat)return;togglePause();return}if(['Space','ArrowUp','KeyW'].includes(e.code)){if(e.repeat)return;action(e)}});
 // Eight distinct obstacles; weighted, tiered and individually sized for a mobile play lane.
 const tokyoObstacleCatalog=[
- {id:'cone',path:'obstacles/cone.png',weight:18,w:31,hitW:.65,hitH:.83,level:0},
- {id:'sleeping_cat',path:'obstacles/sleeping_cat.png',weight:13,w:47,hitW:.73,hitH:.72,level:0},
- {id:'angry_cat',path:'obstacles/angry_cat.png',weight:11,w:45,hitW:.68,hitH:.85,level:1},
+ {id:'cone',path:'obstacles/cone.png',weight:18,w:54,hitW:.65,hitH:.83,level:0},
+ {id:'sleeping_cat',path:'obstacles/sleeping_cat.png',weight:13,w:65,hitW:.73,hitH:.72,level:0},
+ {id:'angry_cat',path:'obstacles/angry_cat.png',weight:11,w:62,hitW:.68,hitH:.85,level:1},
  {id:'tanuki',path:'obstacles/tanuki.png',weight:7,w:48,hitW:.68,hitH:.84,level:2},
- {id:'lantern',path:'obstacles/lantern.png',weight:14,w:37,hitW:.74,hitH:.66,level:0},
+ {id:'lantern',path:'obstacles/lantern.png',weight:14,w:65,hitW:.74,hitH:.66,level:0},
  {id:'boxes',path:'obstacles/boxes.png',weight:10,w:45,hitW:.78,hitH:.87,level:1},
  {id:'ramen',path:'obstacles/ramen.png',weight:16,w:44,hitW:.73,hitH:.55,level:0},
  {id:'umbrellas',path:'obstacles/umbrellas.png',weight:11,w:34,hitW:.68,hitH:.83,level:1}
 ];
 // Tight source rectangles keep Tokyo illustrations at their original proportions.
 const obstacleCrops={
- angry_cat:{x:12,y:43,w:232,h:200},
  boxes:{x:12,y:52,w:232,h:191},
  cone:{x:12,y:32,w:232,h:211},
  lantern:{x:12,y:98,w:232,h:145},
  ramen:{x:12,y:84,w:232,h:159},
- sleeping_cat:{x:12,y:62,w:232,h:181},
  tanuki:{x:12,y:75,w:232,h:168},
  umbrellas:{x:62,y:17,w:132,h:226},
 };
-function activeObstacleCatalog(){const world=currentWorld();return world.obstacles||tokyoObstacleCatalog}
+function daylightAmount(){
+ const cycle=((meters%420)+420)%420;
+ if(cycle<185)return 0;
+ if(cycle<225)return (cycle-185)/40;
+ if(cycle<390)return 1;
+ return 1-(cycle-390)/30;
+}
+function activeObstacleCatalog(){
+ const world=currentWorld();
+ if(world.id==='tokyo')return tokyoObstacleCatalog;
+ return daylightAmount()<.5?world.dayObstacles:world.nightObstacles;
+}
 const obstacleImages={};
 for(const spec of tokyoObstacleCatalog){const image=new Image();image.src=spec.path;obstacleImages[spec.id]=image}
 for(const world of WORLD_CATALOG){
-  if(!world.obstacles)continue;
-  for(const spec of world.obstacles){const image=new Image();image.src=spec.path;obstacleImages[spec.id]=image}
+ for(const spec of [...(world.dayObstacles||[]),...(world.nightObstacles||[])]){
+  const image=new Image();image.src=spec.path;obstacleImages[spec.id]=image;
+ }
 }
 function chooseObstacle(){
  const difficulty=meters<110?0:meters<280?1:2;
@@ -248,8 +361,8 @@ function makeObstacle(){
   for(let i=0;i<amount;i++)objects.push({type:'bone',x:W+(amount===1?20:i*34)*scale+68*scale,y:ground-rand(87,140)*scale,w:20*scale,h:18*scale,hit:false})}
 }
 function puff(x,y,color,n=9){for(let i=0;i<n;i++)particles.push({x,y,vx:rand(-170,170)*scale,vy:rand(-240,-60)*scale,life:rand(.3,.65),color,r:rand(3,7)*scale})}
-function gameOver(){stopMusic();mode='over';gameOverDelay=.62;anim('hurt');shake=9;playEffect('hit');if(Math.floor(meters)>best){best=Math.floor(meters);try{localStorage.setItem('shiba-run-best',best)}catch(e){}}bestEl.textContent=String(best).padStart(4,'0');const world=currentWorld();panel.innerHTML=`<div class="eyebrow">THE ADVENTURE ENDS</div><h1>OOPS! 🐕</h1><p>Our brave shiba has met an obstacle in <strong>${world.name}</strong>.</p><div class="results"><div><small>DISTANCE</small>${Math.floor(meters)} m</div><div><small>BONES</small>${bones} 🦴</div></div><button id="start">TRY AGAIN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE SETTING</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP TO TRY AGAIN</div>`;bindMenu()}
-function update(dt){clock+=dt;dog.animTime+=dt;dog.actionTime+=dt;shake=Math.max(0,shake-dt*15);
+function gameOver(){stopMusic();mode='over';syncPauseButton();gameOverDelay=.62;anim('hurt');shake=9;playEffect('hit');if(Math.floor(meters)>best){best=Math.floor(meters);try{localStorage.setItem('shiba-run-best',best)}catch(e){}}bestEl.textContent=String(best).padStart(4,'0');const world=currentWorld();panel.innerHTML=`<div class="eyebrow">THE ADVENTURE ENDS</div><h1>OOPS! 🐕</h1><p>Our brave shiba has met an obstacle in <strong>${world.name}</strong>.</p><div class="results"><div><small>DISTANCE</small>${Math.floor(meters)} m</div><div><small>SYRNIKI</small>${bones} <img src='assets/syrnik.png' class='syrnik-icon' alt=''></div></div><button id="start">TRY AGAIN →</button><button class="shop-btn" id="openWorlds">🌍 CHANGE LOCATION</button><button class="shop-btn" id="openShop">🐾 SHIBA WARDROBE</button><div class="hint">TAP TO TRY AGAIN</div>`;bindMenu()}
+function update(dt){if(mode==='paused')return;clock+=dt;dog.animTime+=dt;dog.actionTime+=dt;shake=Math.max(0,shake-dt*15);
 if(mode!=='playing'){
 if(mode==='ready'){anim('idle');dog.y=ground-24*scale+Math.sin(clock*3)*2;}
 if(mode==='over'){if(dog.animTime>.30)anim('game_over');gameOverDelay-=dt;if(gameOverDelay<=0)overlay.classList.remove('hidden')}
@@ -336,26 +449,26 @@ function drawRoadSurface(kind='city'){
 }
 function drawTokyoBackground(){
   ctx.fillStyle='#f7d89f';ctx.fillRect(-20,-20,W+40,H+40);
-  const cycle=((meters%420)+420)%420;
-  let night=0;
-  if(cycle<185)night=0; else if(cycle<225)night=(cycle-185)/40; else if(cycle<390)night=1; else night=1-(cycle-390)/30;
+  const night=daylightAmount();
   if(!cityImages['day-far'].complete||!cityImages['day-far'].naturalWidth){
     const fallback=ctx.createLinearGradient(0,0,0,ground);fallback.addColorStop(0,'#92cdf1');fallback.addColorStop(1,'#dff1f2');ctx.fillStyle=fallback;ctx.fillRect(0,0,W,H);
   }
   cityTheme('day',1); cityTheme('night',night); drawRoadSurface(night>.5?'night':'warm'); drawSakura();
 }
 function drawCustomWorldBackground(world){
-  ctx.fillStyle='#f7d89f';ctx.fillRect(-20,-20,W+40,H+40);
-  const img=worldBgImages[world.id];
-  if(img&&img.complete&&img.naturalWidth){
-    ctx.save();ctx.beginPath();ctx.rect(0,0,W,ground);ctx.clip();
-    const displayHeight=Math.max(ground-4,320);
-    tiledPanorama(img,.14,0,displayHeight,0,img.naturalHeight);
-    ctx.restore();
-  }else{
-    const fallback=ctx.createLinearGradient(0,0,0,ground);fallback.addColorStop(0,'#92cdf1');fallback.addColorStop(1,'#f7f0dc');ctx.fillStyle=fallback;ctx.fillRect(0,0,W,ground);
-  }
-  drawRoadSurface(world.road||'city');
+ ctx.fillStyle='#f7d89f';ctx.fillRect(-20,-20,W+40,H+40);
+ const group=worldBgImages[world.id];
+ const alpha=daylightAmount();
+ ctx.save();ctx.beginPath();ctx.rect(0,0,W,ground);ctx.clip();
+ const h=Math.max(ground-4,320);
+ const day=group?.day,night=group?.night;
+ if(day?.complete&&day.naturalWidth){tiledPanorama(day,.14,0,h,0,day.naturalHeight)}
+ else {ctx.fillStyle='#97cdf1';ctx.fillRect(0,0,W,ground)}
+ if(alpha>0 && night?.complete && night.naturalWidth){
+   ctx.save();ctx.globalAlpha=alpha;tiledPanorama(night,.14,0,h,0,night.naturalHeight);ctx.restore();
+ }
+ ctx.restore();
+ drawRoadSurface(alpha>.5?'night':world.road||'city');
 }
 function background(){
   const world=currentWorld();
@@ -415,7 +528,14 @@ function obstacle(o){
   rounded(o.x-o.w*.45,o.y-o.h,o.w*.9,o.h,6*scale,'#d77f42');
  }
 }
-function boneShape(o){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(Math.sin(clock*7+o.x*.01)*.16);ctx.scale(scale,scale);rounded(-13,-4,26,8,4,'#fff8e8');for(const x of [-12,12])for(const y of [-5,5])ellipse(x,y,5.5,5.5,'#fff8e8');ctx.restore()}
-function draw(){ctx.save();if(shake)ctx.translate(rand(-shake,shake),rand(-shake,shake));background();const shadowSize=dog.jumps?Math.max(.4,1-(ground-dog.y)/200):1;ellipse(dog.x,ground+2*scale,26*scale*shadowSize,5*scale*shadowSize,'#708a5c66');objects.filter(o=>o.type==='bone').forEach(boneShape);objects.filter(o=>o.type!=='bone').forEach(obstacle);drawDog(dog.x,dog.y,clock);for(const p of particles){ctx.globalAlpha=Math.min(1,Math.max(0,p.life*2));ellipse(p.x,p.y,p.r,p.r,p.color)}ctx.globalAlpha=1;ctx.restore()}
-function loop(now){const dt=Math.min(.032,(now-last)/1000||0);last=now;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+function boneShape(o){
+ ctx.save();ctx.translate(o.x,o.y);ctx.rotate(Math.sin(clock*6+o.x*.012)*.14);
+ const pulse=1+Math.sin(clock*7+o.x*.009)*.05;ctx.scale(scale*pulse,scale*pulse);
+ if(syrnikSprite.complete&&syrnikSprite.naturalWidth){ctx.drawImage(syrnikSprite,-16,-13,32,26)}
+ else {ellipse(0,0,14,10,'#dc8a35');ellipse(-2,-3,11,5,'#f7bc62')}
+ ctx.restore();
+}
+function draw(){ctx.save();if(shake&&mode!=='paused')ctx.translate(rand(-shake,shake),rand(-shake,shake));background();const shadowSize=dog.jumps?Math.max(.4,1-(ground-dog.y)/200):1;ellipse(dog.x,ground+2*scale,26*scale*shadowSize,5*scale*shadowSize,'#708a5c66');objects.filter(o=>o.type==='bone').forEach(boneShape);objects.filter(o=>o.type!=='bone').forEach(obstacle);drawDog(dog.x,dog.y,clock);for(const p of particles){ctx.globalAlpha=Math.min(1,Math.max(0,p.life*2));ellipse(p.x,p.y,p.r,p.r,p.color)}ctx.globalAlpha=1;ctx.restore()}
+function loop(now){const dt=Math.min(.032,(now-last)/1000||0);last=now;update(dt);draw();requestAnimationFrame(loop)}showHome();
+requestAnimationFrame(loop);
 })();

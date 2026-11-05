@@ -304,14 +304,35 @@ function playEffect(key){
   }
 }
 function startMusic(){
-  if(!musicEnabled||mode!=='playing')return;
+  if(!musicEnabled||mode!=='playing'){
+    themeMusic.muted=true;
+    themeMusic.pause();
+    return;
+  }
   themeMusic.muted=false;
   const p=themeMusic.play();if(p&&p.catch)p.catch(()=>{});
 }
-function stopMusic(){themeMusic.pause();}
-document.addEventListener('visibilitychange',()=>{
-  if(document.hidden)stopMusic();else if(mode==='playing'&&musicEnabled)startMusic();
+function stopMusic(){
+  themeMusic.pause();
+  themeMusic.muted=true;
+}
+themeMusic.addEventListener('play',()=>{
+  if(!musicEnabled||mode!=='playing'){
+    themeMusic.pause();
+    themeMusic.muted=true;
+  }
 });
+themeMusic.addEventListener('playing',()=>{
+  if(!musicEnabled||mode!=='playing'){
+    themeMusic.pause();
+    themeMusic.muted=true;
+  }
+});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)stopMusic();else startMusic();
+});
+window.addEventListener('pagehide',stopMusic,{passive:true});
+window.addEventListener('blur',()=>{if(mode!=='playing'||!musicEnabled)stopMusic();},{passive:true});
 // iOS Safari requires starting/resuming Web Audio from a real user gesture.
 function unlockAudio(){
   try{
