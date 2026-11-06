@@ -445,9 +445,10 @@ function makeObstacle(){
  const spec=chooseObstacle();
  const image=obstacleImages[spec.id];
  const rect=obstacleVisibleRects[spec.id];
- const width=spec.w*scale;
- const ratio=rect?rect.h/rect.w:(image&&image.naturalWidth?image.naturalHeight/image.naturalWidth:1);
- const height=Math.max(18*scale,width*ratio);
+ // Every obstacle is half the Shiba's visible standing height, in every city.
+ const height=54*scale;
+ const ratio=rect?rect.w/rect.h:(image&&image.naturalHeight?image.naturalWidth/image.naturalHeight:1);
+ const width=height*ratio;
  // Same ground coordinate as Ozzy's feet (no per-city vertical offsets).
  objects.push({type:spec.id,x:W+68*scale,y:ground,w:width,h:height,hitW:spec.hitW,hitH:spec.hitH,hit:false});
  if(Math.random()<.7){const amount=Math.random()<.25?3:1;
@@ -612,9 +613,10 @@ function obstacle(o){
  const image=obstacleImages[o.type];
  if(image&&image.complete&&image.naturalWidth){
   const rect=obstacleVisibleRects[o.type]||{x:0,y:0,w:image.naturalWidth,h:image.naturalHeight};
-  // This also repairs obstacles spawned before their PNG finished loading.
-  o.h=Math.max(18*scale,o.w*rect.h/rect.w);
-  // o.y is exactly the dog's ground line; render visible pixels down to that line.
+  // Keep the same height even when the image loads after the obstacle spawns.
+  o.h=54*scale;
+  o.w=o.h*rect.w/rect.h;
+  // Visible pixels touch Ozzy's ground line; aspect ratio and hitbox stay in sync.
   ctx.drawImage(image,rect.x,rect.y,rect.w,rect.h,o.x-o.w/2,o.y-o.h,o.w,o.h);
  }else{
   rounded(o.x-o.w*.45,o.y-o.h,o.w*.9,o.h,6*scale,'#d77f42');
